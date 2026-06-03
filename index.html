@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calculator</title>
+  <link rel="stylesheet" href="assets/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+
+<body>
+  <!-- Theme Toggle Button -->
+  <button class="btn btn-outline-secondary theme-toggle-btn" id="theme-toggle" onclick="toggleTheme()"
+    title="Toggle dark/light mode">
+    🌙
+  </button>
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-6 col-md-6 col-sm-8">
+        <div class="border border-dotted border-3 rounded-3 p-3 mb-4 bg-white bg-opacity-50">
+          <h4 class="text-center group-header mb-0">VUNA CALCULATOR</h4>
+          <p class="text-center text-small text-muted">
+            <i>Created by set 2025/26 Software Engineering</i>
+          </p>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+            <div class="card calculator-card">
+              <div class="card-body p-4">
+                <div class="calculator">
+                  <div class="display-container">
+                    <input type="text" class="form-control" id="result" placeholder="0" disabled />
+                  </div>
+
+                  <div class="btn-grid">
+                    <button class="btn btn-light" onclick="bracketToResult('(')">(</button>
+                    <button class="btn btn-light" onclick="bracketToResult(')')">)</button>
+                    <button class="btn btn-light" onclick="backspace()">←</button>
+
+                    <!-- Row trig -->
+                    <button class="btn btn-action" onclick="clearResult()">AC</button>
+
+                    <!-- Row 2 -->
+                    <button class="btn btn-light" onclick="appendToResult(7)">7</button>
+                    <button class="btn btn-light" onclick="appendToResult(8)">8</button>
+                    <button class="btn btn-light" onclick="appendToResult(9)">9</button>
+
+                    <!-- Row 3 -->
+                    <button class="btn btn-operator" onclick="operatorToResult('/')">÷</button>
+                    <button class="btn btn-light" onclick="appendToResult(4)">4</button>
+                    <button class="btn btn-light" onclick="appendToResult(5)">5</button>
+                    <button class="btn btn-light" onclick="appendToResult(6)">6</button>
+
+                    <!-- Row 4 -->
+                    <button class="btn btn-operator" onclick="operatorToResult('*')">×</button>
+                    <button class="btn btn-light" onclick="appendToResult(1)">1</button>
+                    <button class="btn btn-light" onclick="appendToResult(2)">2</button>
+                    <button class="btn btn-light" onclick="appendToResult(3)">3</button>
+
+                    <!-- Row 5 -->
+                    <button class="btn btn-operator" onclick="operatorToResult('+')">+</button>
+                    <button class="btn btn-light" onclick="appendToResult('.')">.</button>
+                    <button class="btn btn-light" onclick="appendToResult(0)">0</button>
+                    <button class="btn btn-operator" onclick="percentToResult('%')">%</button>
+                    
+                    <!-- Row 9 -->
+                    <button class="btn btn-operator" onclick="operatorToResult('-')">−</button>
+
+                    <button class="btn btn-equals" onclick="calculateResult()" style="grid-column: span 4;">=</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <script src="assets/js/bootstrap.min.js"></script>
+          <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+          <script src="src/calculator.js"></script>
+          <script src="assets/js/script.js"></script>
+          <button id="scroll-to-calculator" title="Back to Calculator">↑</button>
+        </div>
+      </div>
+</body>
+
+
+</html>
+
