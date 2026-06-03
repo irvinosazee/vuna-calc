@@ -33,6 +33,7 @@ describe('evaluateExpression — errors', () => {
   it('throws on unbalanced close paren', () => expect(() => evaluateExpression('1+2)')).toThrow());
   it('throws on empty input', () => expect(() => evaluateExpression('')).toThrow());
   it('throws on unknown identifier', () => expect(() => evaluateExpression('foo(2)')).toThrow());
+  it('throws at the tangent asymptote (90 degrees)', () => expect(() => evaluateExpression('tan(90)')).toThrow());
 });
 
 describe('computePercent', () => {

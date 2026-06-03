@@ -5,7 +5,11 @@ const CONSTANTS = { pi: Math.PI, e: Math.E };
 const FUNCTIONS = {
   sin: (x) => Math.sin((x * Math.PI) / 180),
   cos: (x) => Math.cos((x * Math.PI) / 180),
-  tan: (x) => Math.tan((x * Math.PI) / 180),
+  tan: (x) => {
+    const rad = (x * Math.PI) / 180;
+    if (Math.abs(Math.cos(rad)) < 1e-12) throw new Error('Math error');
+    return Math.tan(rad);
+  },
   asin: (x) => (Math.asin(x) * 180) / Math.PI,
   acos: (x) => (Math.acos(x) * 180) / Math.PI,
   atan: (x) => (Math.atan(x) * 180) / Math.PI,
