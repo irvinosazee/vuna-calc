@@ -11,7 +11,7 @@
 
 <body>
   <!-- Theme Toggle Button -->
-  <button class="btn btn-outline-secondary theme-toggle-btn" id="theme-toggle" onclick="toggleTheme()"
+  <button class="btn btn-outline-secondary theme-toggle-btn" id="theme-toggle"
     title="Toggle dark/light mode">
     🌙
   </button>
@@ -34,6 +34,17 @@
                   </div>
 
                   <div class="btn-grid">
+                    <!-- Scientific functions (powered by the safe evaluator) -->
+                    <button class="btn btn-special" onclick="appendToResult('sin(')">sin</button>
+                    <button class="btn btn-special" onclick="appendToResult('cos(')">cos</button>
+                    <button class="btn btn-special" onclick="appendToResult('tan(')">tan</button>
+                    <button class="btn btn-special" onclick="appendToResult('sqrt(')">√</button>
+
+                    <button class="btn btn-special" onclick="appendToResult('pi')">π</button>
+                    <button class="btn btn-special" onclick="appendToResult('e')">e</button>
+                    <button class="btn btn-special" onclick="operatorToResult('^')">x^y</button>
+                    <button class="btn btn-special" onclick="appendToResult('ans')">ans</button>
+
                     <button class="btn btn-light" onclick="bracketToResult('(')">(</button>
                     <button class="btn btn-light" onclick="bracketToResult(')')">)</button>
                     <button class="btn btn-light" onclick="backspace()">←</button>

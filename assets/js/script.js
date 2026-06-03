@@ -1,4 +1,3 @@
-/* exported toggleTheme, appendToResult, bracketToResult, backspace, operatorToResult, clearResult, percentToResult, calculateResult */
 // ===============================
 // 🧠 SMART RESULT MEMORY FEATURE
 // ===============================
@@ -33,6 +32,7 @@ window.addEventListener("DOMContentLoaded", function () {
   const btn = document.getElementById("theme-toggle");
 
   if (btn) {
+    btn.addEventListener("click", toggleTheme);
     if (theme === "dark") {
       body.classList.add("dark-mode");
       btn.innerHTML = "☀️";
@@ -94,7 +94,7 @@ function calculateResult() {
     display.value = result;
     currentExpression = result.toString();
     updateResult();
-  } catch (e) { // eslint-disable-line no-unused-vars
+  } catch {
     currentExpression = "Error";
     updateResult();
   }

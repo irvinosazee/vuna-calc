@@ -3,7 +3,6 @@ coverage
 dist
 .git
 .github
-tests
 docs
 *.docx
 *.md
