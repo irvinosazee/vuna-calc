@@ -1,0 +1,188 @@
+/* ============================================================
+   VUNA Calculator — Neumorphic Soft UI theme
+   Loaded AFTER bootstrap + styles.css to override them.
+   All surfaces share one background so the "extruded" soft
+   shadows read correctly. Colours are driven by CSS variables,
+   so dark mode only needs to redefine the variables.
+   ============================================================ */
+
+:root {
+  --neu-bg: #e0e5ec;
+  --neu-text: #4b5563;
+  --neu-muted: #8b95a5;
+  --neu-accent: #5b7cfa;
+  --neu-accent-strong: #4361ee;
+  --neu-danger: #ef6461;
+  --neu-shadow-dark: #a3b1c6;
+  --neu-shadow-light: #ffffff;
+  --neu-radius: 16px;
+  --neu-gap: 16px;
+}
+
+body.dark-mode {
+  --neu-bg: #2b2f36;
+  --neu-text: #c7ced9;
+  --neu-muted: #8a93a3;
+  --neu-accent: #8aa0ff;
+  --neu-accent-strong: #7c93ff;
+  --neu-danger: #ff7b78;
+  --neu-shadow-dark: #1b1e23;
+  --neu-shadow-light: #3a4049;
+}
+
+/* ---- Page ---------------------------------------------------- */
+body,
+body.dark-mode {
+  background: var(--neu-bg) !important;
+  color: var(--neu-text);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  font-family: "Inter", "Segoe UI", Tahoma, sans-serif;
+}
+
+.container { padding: 24px 0; }
+
+/* ---- Title panel -------------------------------------------- */
+.title-panel {
+  background: var(--neu-bg);
+  border-radius: 20px;
+  box-shadow:
+    7px 7px 14px var(--neu-shadow-dark),
+    -7px -7px 14px var(--neu-shadow-light);
+}
+
+.group-header { color: var(--neu-text) !important; letter-spacing: 3px; }
+.title-panel .text-muted { color: var(--neu-muted) !important; }
+
+/* ---- Calculator card ---------------------------------------- */
+.card.calculator-card {
+  background: var(--neu-bg) !important;
+  border: none !important;
+  border-radius: 28px;
+  box-shadow:
+    12px 12px 24px var(--neu-shadow-dark),
+    -12px -12px 24px var(--neu-shadow-light);
+}
+
+.card.calculator-card .card-body { background: transparent; padding: 28px; }
+
+/* Neumorphic slabs stay grounded — cancel the glassmorphic hover float
+   from styles.css. */
+.card.calculator-card:hover {
+  transform: none;
+  box-shadow:
+    12px 12px 24px var(--neu-shadow-dark),
+    -12px -12px 24px var(--neu-shadow-light);
+}
+
+/* ---- Display ------------------------------------------------- */
+.display-container {
+  background: transparent;
+  height: auto;
+  margin-bottom: 24px;
+}
+
+#result,
+#result:disabled {
+  background: var(--neu-bg) !important;
+  color: var(--neu-text) !important;
+  border: none !important;
+  border-radius: var(--neu-radius);
+  text-align: right;
+  font-size: 2rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  padding: 22px 20px;
+  min-height: 72px;
+  opacity: 1;
+  box-shadow:
+    inset 5px 5px 10px var(--neu-shadow-dark),
+    inset -5px -5px 10px var(--neu-shadow-light);
+}
+
+/* ---- Button grid -------------------------------------------- */
+.btn-grid { gap: var(--neu-gap); }
+
+.calculator .btn {
+  background: var(--neu-bg) !important;
+  color: var(--neu-text) !important;
+  border: none !important;
+  border-radius: var(--neu-radius);
+  height: 58px;
+  font-size: 18px;
+  font-weight: 600;
+  box-shadow:
+    5px 5px 10px var(--neu-shadow-dark),
+    -5px -5px 10px var(--neu-shadow-light);
+  transition: color 0.15s ease, box-shadow 0.15s ease, transform 0.05s ease;
+}
+
+.calculator .btn:hover { color: var(--neu-accent) !important; transform: none; }
+
+.calculator .btn:active {
+  transform: scale(0.98);
+  box-shadow:
+    inset 4px 4px 8px var(--neu-shadow-dark),
+    inset -4px -4px 8px var(--neu-shadow-light);
+}
+
+/* Operators — accent text */
+.calculator .btn-operator { color: var(--neu-accent) !important; font-weight: 700; }
+
+/* Scientific keys — accent text, slightly smaller */
+.calculator .btn-special { color: var(--neu-accent) !important; font-size: 15px; }
+
+/* AC — danger text */
+.calculator .btn-action { color: var(--neu-danger) !important; font-weight: 700; }
+
+/* Equals — filled accent, raised */
+.calculator .btn-equals {
+  background: var(--neu-accent) !important;
+  color: #ffffff !important;
+  font-weight: 700;
+  letter-spacing: 1px;
+  box-shadow:
+    5px 5px 12px var(--neu-shadow-dark),
+    -5px -5px 12px var(--neu-shadow-light);
+}
+
+.calculator .btn-equals:hover { color: #fff !important; filter: brightness(1.06); }
+
+.calculator .btn-equals:active {
+  filter: brightness(0.97);
+  box-shadow: inset 4px 4px 9px rgba(0, 0, 0, 0.28);
+}
+
+/* ---- Theme toggle ------------------------------------------- */
+.theme-toggle-btn {
+  background: var(--neu-bg) !important;
+  border: none !important;
+  color: var(--neu-text) !important;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  box-shadow:
+    5px 5px 10px var(--neu-shadow-dark),
+    -5px -5px 10px var(--neu-shadow-light);
+  transition: box-shadow 0.15s ease;
+}
+
+.theme-toggle-btn:active {
+  box-shadow:
+    inset 4px 4px 8px var(--neu-shadow-dark),
+    inset -4px -4px 8px var(--neu-shadow-light);
+}
+
+/* ---- Misc --------------------------------------------------- */
+/* Unused legacy "back to calculator" button — hide for a clean layout */
+#scroll-to-calculator { display: none; }
+
+/* Respect users who prefer less motion */
+@media (prefers-reduced-motion: reduce) {
+  .calculator .btn { transition: none; }
+}

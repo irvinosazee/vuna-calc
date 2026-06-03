@@ -109,12 +109,18 @@ function updateResult() {
 // Keyboard Input
 // ------------------------------
 window.addEventListener("keydown", function (e) {
+  // Don't hijack browser/OS shortcuts (Ctrl+R, Cmd+L, etc.)
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+
   const k = e.key;
   if (k >= "0" && k <= "9") appendToResult(k);
   else if (k === ".") appendToResult(".");
   else if (k === "+" || k === "-" || k === "*" || k === "/") operatorToResult(k);
+  else if (k === "^") operatorToResult("^");
   else if (k === "(" || k === ")") bracketToResult(k);
   else if (k === "%") percentToResult();
+  // Letters build function names / constants: type "sin(30)", "sqrt(9)", "pi", "ans"
+  else if (/^[a-zA-Z]$/.test(k)) appendToResult(k.toLowerCase());
   else if (k === "Enter" || k === "=") { e.preventDefault(); calculateResult(); }
   else if (k === "Backspace") backspace();
   else if (k === "Escape") clearResult();

@@ -8,11 +8,11 @@ A browser calculator (HTML + Bootstrap + vanilla JS) with a gated CI/CD pipeline
 
 ## Features
 - Arithmetic with correct precedence, parentheses, `**`, unary minus
-- Degree-based trig (`sin`, `cos`, `tan`, ...), `sqrt`, `ln`, `log`, `pi`, `e`, `ans`
+- On-screen scientific keypad: degree-based trig (`sin`, `cos`, `tan`, ...), `sqrt`, `ln`, `log`, `pi`, `e`, `ans`
 - Standard percent (`100 + 10% = 110`)
-- Keyboard input (digits, operators, Enter, Backspace, Esc)
-- Light/dark theme
-- No `eval()` — a safe expression evaluator
+- Full keyboard input — digits, operators, `^` for power, and typed function names (`sin(30)`, `sqrt(9)`, `pi`); `Enter` to evaluate, `Backspace`, `Esc` to clear
+- Neumorphic soft-UI design with light/dark theme
+- No `eval()` — a safe expression evaluator (tokenizer → shunting-yard → RPN)
 
 ## Local development
 ```bash
