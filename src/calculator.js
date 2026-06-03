@@ -139,6 +139,26 @@ function evaluateExpression(expr, lastResult = 0) {
   return result;
 }
 
+function computePercent(expr) {
+  if (!expr) return expr;
+  const m = String(expr).match(/^(.*?)([+\-*/])([0-9.]+)$/);
+  if (!m) {
+    const n = parseFloat(expr);
+    if (Number.isNaN(n)) return expr;
+    return String(n / 100);
+  }
+  const [, leftExpr, op, rightNum] = m;
+  const right = parseFloat(rightNum);
+  let leftVal;
+  try {
+    leftVal = evaluateExpression(leftExpr);
+  } catch {
+    return expr;
+  }
+  const percentValue = (op === '+' || op === '-') ? (leftVal * right) / 100 : right / 100;
+  return `${leftExpr}${op}${percentValue}`;
+}
+
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { tokenize, toRPN, evalRPN, evaluateExpression };
+  module.exports = { tokenize, toRPN, evalRPN, evaluateExpression, computePercent };
 }
