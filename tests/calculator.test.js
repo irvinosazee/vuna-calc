@@ -25,3 +25,12 @@ describe('evaluateExpression — power, unary, constants, functions', () => {
   it('computes sqrt', () => expect(evaluateExpression('sqrt(9)')).toBe(3));
   it('substitutes ans', () => expect(evaluateExpression('ans+1', 41)).toBe(42));
 });
+
+describe('evaluateExpression — errors', () => {
+  it('throws on division by zero (non-finite)', () => expect(() => evaluateExpression('1/0')).toThrow());
+  it('throws on trailing operator', () => expect(() => evaluateExpression('3+')).toThrow());
+  it('throws on unbalanced open paren', () => expect(() => evaluateExpression('(1+2')).toThrow());
+  it('throws on unbalanced close paren', () => expect(() => evaluateExpression('1+2)')).toThrow());
+  it('throws on empty input', () => expect(() => evaluateExpression('')).toThrow());
+  it('throws on unknown identifier', () => expect(() => evaluateExpression('foo(2)')).toThrow());
+});
