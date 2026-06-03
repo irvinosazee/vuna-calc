@@ -1,3 +1,4 @@
+/* exported toggleTheme, appendToResult, bracketToResult, backspace, operatorToResult, clearResult, percentToResult, calculateResult */
 // ===============================
 // 🧠 SMART RESULT MEMORY FEATURE
 // ===============================
@@ -44,15 +45,6 @@ window.addEventListener("DOMContentLoaded", function () {
 });
 
 // ------------------------------
-// Calculator State
-// ------------------------------
-let left = "";
-let operator = "";
-let right = "";
-let steps = [];
-const MAX_STEPS = 6;
-
-// ------------------------------
 // Basic Calculator Functions
 // ------------------------------
 function appendToResult(value) {
@@ -84,56 +76,9 @@ function clearResult() {
   updateResult();
 }
 
-
-function normalizeExpression(expr) {
-  return expr
-    .replace(/asin\(/g, "asinDeg(")
-    .replace(/acos\(/g, "acosDeg(")
-    .replace(/atan\(/g, "atanDeg(")
-    .replace(/sin\(/g, "sinDeg(")
-    .replace(/cos\(/g, "cosDeg(")
-    .replace(/tan\(/g, "tanDeg(")
-    .replace(/asinh\(/g, "asinh(")
-    .replace(/sinh\(/g, "sinh(")
-    .replace(/\be\b/g, "Math.E")
-    .replace(/\bpi\b/g, "Math.PI");
-}
-
 function percentToResult() {
   if (!currentExpression) return;
-
-  const match = currentExpression.match(/(.+?)(\*\*|[+\-*/^])([0-9.]*)$/);
-
-  if (!match) {
-    const num = parseFloat(currentExpression);
-    if (isNaN(num)) return;
-
-    currentExpression = (num / 100).toString();
-  } else {
-    const leftPart = match[1];
-    const rightPart = match[3];
-
-    if (!rightPart) return;
-
-    let leftVal;
-
-    try {
-      leftVal = eval(leftPart);
-    } catch (e) {
-      leftVal = parseFloat(leftPart);
-    }
-
-    const rightVal = parseFloat(rightPart);
-    if (isNaN(leftVal) || isNaN(rightVal)) return;
-
-    const percentVal = (leftVal * rightVal) / 100;
-
-    currentExpression = percentVal.toString();
-  }
-
-  // 🔥 ADD THIS LINE
-  currentExpression += "*";
-
+  currentExpression = computePercent(currentExpression);
   updateResult();
 }
 
@@ -142,34 +87,14 @@ function percentToResult() {
 // ------------------------------
 function calculateResult() {
   if (!currentExpression) return;
-
   try {
-   
     const display = document.getElementById("result");
-    let normalizedExpression = normalizeExpression(currentExpression);
-
-    // 🧠 Replace "ans" with last result automatically
-    normalizedExpression = normalizedExpression.replace(
-      /\bans\b/gi,
-      LAST_RESULT,
-    );
-
-    // Calculate result
-    let result = eval(normalizedExpression);
-    console.log("Calculated result for expression:", currentExpression, "->", result);
-    // Save result for future expressions
+    const result = evaluateExpression(currentExpression, LAST_RESULT);
     LAST_RESULT = result;
-
-    // Display normally
     display.value = result;
-
-    if (isNaN(result) || !isFinite(result)) {
-      throw new Error();
-    }
-
     currentExpression = result.toString();
     updateResult();
-  } catch (e) {
+  } catch (e) { // eslint-disable-line no-unused-vars
     currentExpression = "Error";
     updateResult();
   }
@@ -179,3 +104,18 @@ function calculateResult() {
 function updateResult() {
   document.getElementById("result").value = currentExpression || "0";
 }
+
+// ------------------------------
+// Keyboard Input
+// ------------------------------
+window.addEventListener("keydown", function (e) {
+  const k = e.key;
+  if (k >= "0" && k <= "9") appendToResult(k);
+  else if (k === ".") appendToResult(".");
+  else if (k === "+" || k === "-" || k === "*" || k === "/") operatorToResult(k);
+  else if (k === "(" || k === ")") bracketToResult(k);
+  else if (k === "%") percentToResult();
+  else if (k === "Enter" || k === "=") { e.preventDefault(); calculateResult(); }
+  else if (k === "Backspace") backspace();
+  else if (k === "Escape") clearResult();
+});
