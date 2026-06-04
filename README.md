@@ -1,17 +1,18 @@
 # VUNA Calculator
 
-A browser calculator (HTML + Bootstrap + vanilla JS) with a gated CI/CD pipeline.
+A browser calculator (HTML + Bootstrap + vanilla JS) for the SEN 482 DevOps CA, with a
+CI/CD pipeline that auto-deploys to cPanel.
 
-![CI](https://github.com/USERNAME/vuna-calc-482/actions/workflows/ci.yml/badge.svg)
+![CI/CD](https://github.com/USERNAME/vuna-calc/actions/workflows/ci-cd.yml/badge.svg)
 
-**Live:** https://REPLACE-WITH-VERCEL-URL.vercel.app
+**Live:** http://irvin.vudse26.cloud
 
 ## Features
-- Arithmetic with correct precedence, parentheses, `**`, unary minus
-- On-screen scientific keypad: degree-based trig (`sin`, `cos`, `tan`, ...), `sqrt`, `ln`, `log`, `pi`, `e`, `ans`
-- Standard percent (`100 + 10% = 110`)
-- Full keyboard input — digits, operators, `^` for power, and typed function names (`sin(30)`, `sqrt(9)`, `pi`); `Enter` to evaluate, `Backspace`, `Esc` to clear
-- Neumorphic soft-UI design with light/dark theme
+- Digits `0–9`, decimal point, operators `+ − × ÷`, and `=`
+- `AC` (all clear) and `CE` (clear current entry)
+- **Combination & permutation** — `nCr` / `nPr` (e.g. `5 nCr 2 = 10`, `5 nPr 2 = 20`)
+- Keyboard input (digits, operators, Enter, Backspace, Esc = AC, Delete = CE)
+- Neumorphic soft-UI with light/dark theme
 - No `eval()` — a safe expression evaluator (tokenizer → shunting-yard → RPN)
 
 ## Local development
@@ -27,8 +28,6 @@ python3 -m http.server 8000   # then open http://localhost:8000
 | Stage | Tool | When |
 |-------|------|------|
 | Lint & Test | ESLint + Jest | every PR + push to main |
-| Docker Build | Docker (nginx) | every PR + push to main |
-| Deploy (preview) | Vercel | every branch/PR |
-| Deploy (production) | Vercel | merge to `main` (gated by CI) |
+| Deploy | rsync over SSH → cPanel `public_html` | push to `main` |
 
-See `docs/PIPELINE.md` for the full guide.
+See `docs/PIPELINE.md` for the full guide and one-time server setup.

@@ -1,58 +1,68 @@
-# Pipeline Guide
+# Pipeline Guide (GitHub Actions → cPanel)
 
-## The gated branch model
-1. Create a feature branch and push commits.
-2. Open a PR to `main`. GitHub Actions runs **Lint & Test** and **Docker Build**.
-3. Vercel posts a **preview deployment** on the PR.
-4. Branch protection blocks the merge until both CI checks pass (and a review, if enabled).
-5. Merge to `main`. Vercel deploys **production** from `main` — always a passed build.
-
+## Flow
 ```
-feature branch -> PR -> CI (lint, test, docker) -> branch protection gate -> merge -> Vercel prod
-                              \-> Vercel preview (per PR)
+push to main ──▶ GitHub Actions
+                 ├── ci: npm ci → lint → test (Jest + coverage)
+                 └── deploy (needs ci): npm run build → rsync dist/ over SSH
+                                        └─▶ /home/irvin.vudse26.cloud/public_html
+                                            └─▶ http://irvin.vudse26.cloud
+PRs run ci only (no deploy).
 ```
 
-## CI stages (`.github/workflows/ci.yml`)
-- **lint-and-test:** `npm ci` then `npm run lint` then `npm test` (Jest with coverage thresholds: branches 70, functions/lines/statements 80). Coverage uploaded as an artifact.
-- **docker-build:** builds the multi-stage `Dockerfile` (node build then nginx) with GitHub Actions layer cache. Validation only; nothing is pushed to a registry.
+## CI/CD stages (`.github/workflows/ci-cd.yml`)
+- **ci:** `npm ci` → `npm run lint` → `npm test` (coverage thresholds: branches 70,
+  functions/lines/statements 80). Coverage uploaded as an artifact.
+- **deploy:** builds `dist/` and rsyncs it into `public_html` over SSH using a dedicated
+  deploy key. `--delete` mirrors the folder (server dirs `cgi-bin` / `.well-known` excluded).
 
 ## One-time setup
 
-### 1. Push to GitHub
+### 1. New GitHub repo
 ```bash
-git remote add origin git@github.com:USERNAME/vuna-calc-482.git
+git remote add origin git@github.com:USERNAME/vuna-calc.git
 git push -u origin main
 ```
 
-### 2. Branch protection (Settings then Branches then Add rule for `main`)
-- Require a pull request before merging
-- Require status checks to pass: **Lint & Test**, **Docker Build**
-- Require branches to be up to date before merging
-- (optional) Require 1 approving review
-- Do not allow bypassing the above settings
+### 2. Generate a dedicated deploy key and authorise it on the server
+```bash
+# locally
+ssh-keygen -t ed25519 -C "github-actions-deploy" -f ~/.ssh/vuna_deploy -N ""
 
-### 3. Vercel (dashboard)
-- Import the GitHub repo (installs the Vercel GitHub App).
-- Framework preset: **Other**; Build Command `npm run build`; Output Directory `dist`.
-- Production Branch: `main`. Preview deployments: enabled for other branches.
-- No tokens are stored in GitHub — Vercel authenticates via its own GitHub App.
-- Copy the production URL into `README.md`.
+# authorise the PUBLIC key on the server (one password login, then rotate the password)
+ssh-copy-id -i ~/.ssh/vuna_deploy.pub -p 22 irvin@159.198.47.177
+#   OR cPanel → SSH Access → Manage SSH Keys → Import → Authorize
 
-## How this maps to the lab manual (`CICD_Pipeline_Lab_Manual.docx`)
+# test
+ssh -i ~/.ssh/vuna_deploy -p 22 irvin@159.198.47.177 'echo OK && ls public_html'
+```
+
+### 3. Add GitHub Secrets (repo → Settings → Secrets and variables → Actions)
+| Secret | Value |
+|--------|-------|
+| `SSH_HOST` | `159.198.47.177` |
+| `SSH_USER` | `irvin` |
+| `SSH_PORT` | `22` |
+| `SSH_PRIVATE_KEY` | contents of `~/.ssh/vuna_deploy` (the private key) |
+
+`DEPLOY_PATH` is set in the workflow (`/home/irvin.vudse26.cloud/public_html`).
+
+### 4. Push and watch
+Push to `main`, open the **Actions** tab, watch `ci` then `deploy` run, then refresh
+`http://irvin.vudse26.cloud` to see the change live.
+
+## How this maps to Mr. Iyke's manual (`CICD_Pipeline_Lab_Manual.docx`)
 | Manual concept | Here |
 |----------------|------|
-| Node/Express app | static calculator (no server) |
+| Node/Express app | static calculator (no server process) |
 | Jest + coverage gate | same (on `src/calculator.js`) |
 | ESLint | same (flat config) |
-| Multi-stage Dockerfile, non-root | node build then nginx serve |
-| Push image to Docker Hub | build-only validation (no registry) |
-| SSH deploy to Linux server | replaced by Vercel Git integration |
-| GitHub Secrets for deploy | none needed (Vercel App handles auth) |
-| Branch protection + required checks | same |
-| Post-deploy smoke test | Vercel build + preview URL |
+| Docker image + registry | not used — cPanel serves static files directly |
+| SSH deploy to Linux server | **same** — rsync over SSH into `public_html` |
+| GitHub Secrets for SSH | `SSH_HOST/USER/PORT/PRIVATE_KEY` |
+| Post-deploy smoke test | refresh the live domain |
 
-## Extending the pipeline
-- Push the image to GitHub Container Registry (`ghcr.io`) using the built-in `GITHUB_TOKEN`.
-- Add Dependabot (`.github/dependabot.yml`) for npm + actions updates.
-- Add a Trivy scan of the nginx image.
-- Add a staging environment that deploys from a `develop` branch.
+## Security
+- Rotate the cPanel and SSH passwords that were shared.
+- The pipeline uses a dedicated SSH **key**, never a password; the private key lives only
+  in `SSH_PRIVATE_KEY` (GitHub Secret) and is never committed.
