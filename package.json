@@ -1,7 +1,7 @@
 {
   "name": "vuna-calc-482",
   "version": "1.0.0",
-  "description": "VUNA Calculator with a GitHub Actions + Vercel CI/CD pipeline",
+  "description": "VUNA Calculator with a GitHub Actions + cPanel CI/CD pipeline",
   "private": true,
   "scripts": {
     "test": "jest --coverage",
