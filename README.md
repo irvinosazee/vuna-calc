@@ -3,7 +3,7 @@
 A browser calculator (HTML + Bootstrap + vanilla JS) for the SEN 482 DevOps CA, with a
 CI/CD pipeline that auto-deploys to cPanel.
 
-![CI/CD](https://github.com/USERNAME/vuna-calc/actions/workflows/ci-cd.yml/badge.svg)
+![CI/CD](https://github.com/irvinosazee/vuna-calc/actions/workflows/ci-cd.yml/badge.svg)
 
 **Live:** http://irvin.vudse26.cloud
 
