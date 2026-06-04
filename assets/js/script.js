@@ -1,8 +1,7 @@
 // ===============================
-// 🧠 SMART RESULT MEMORY FEATURE
+// VUNA Calculator — DOM wiring
 // ===============================
 
-let LAST_RESULT = 0;
 var currentExpression = "";
 
 // ------------------------------
@@ -25,7 +24,7 @@ function toggleTheme() {
   }
 }
 
-// Set theme on page load from localStorage
+// Set theme on page load and wire the toggle button
 window.addEventListener("DOMContentLoaded", function () {
   const theme = localStorage.getItem("theme");
   const body = document.body;
@@ -45,52 +44,51 @@ window.addEventListener("DOMContentLoaded", function () {
 });
 
 // ------------------------------
-// Basic Calculator Functions
+// Input handlers
 // ------------------------------
 function appendToResult(value) {
   currentExpression += value.toString();
   updateResult();
 }
 
-function bracketToResult(value) {
+// Operators, incl. 'C' (nCr) and 'P' (nPr)
+function operatorToResult(value) {
   currentExpression += value;
   updateResult();
 }
 
+// Delete one character (keyboard Backspace)
 function backspace() {
   currentExpression = currentExpression.slice(0, -1);
   updateResult();
 }
 
-function operatorToResult(value) {
-  if (value === "^") {
-    currentExpression += "**";
-  } else {
-    currentExpression += value;
-  }
-  updateResult();
-}
-
+// AC — clear everything
 function clearResult() {
   currentExpression = "";
   updateResult();
 }
 
-function percentToResult() {
+// CE — clear the current entry: drop the trailing number, else the trailing operator
+function clearEntry() {
   if (!currentExpression) return;
-  currentExpression = computePercent(currentExpression);
+  const stripped = currentExpression.replace(/[0-9.]+$/, "");
+  if (stripped !== currentExpression) {
+    currentExpression = stripped;
+  } else {
+    currentExpression = currentExpression.slice(0, -1);
+  }
   updateResult();
 }
 
 // ------------------------------
-// Calculate Result
+// Evaluate
 // ------------------------------
 function calculateResult() {
   if (!currentExpression) return;
   try {
     const display = document.getElementById("result");
-    const result = evaluateExpression(currentExpression, LAST_RESULT);
-    LAST_RESULT = result;
+    const result = evaluateExpression(currentExpression);
     display.value = result;
     currentExpression = result.toString();
     updateResult();
@@ -100,7 +98,6 @@ function calculateResult() {
   }
 }
 
-
 function updateResult() {
   document.getElementById("result").value = currentExpression || "0";
 }
@@ -109,19 +106,14 @@ function updateResult() {
 // Keyboard Input
 // ------------------------------
 window.addEventListener("keydown", function (e) {
-  // Don't hijack browser/OS shortcuts (Ctrl+R, Cmd+L, etc.)
-  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  if (e.ctrlKey || e.metaKey || e.altKey) return; // don't hijack browser shortcuts
 
   const k = e.key;
   if (k >= "0" && k <= "9") appendToResult(k);
   else if (k === ".") appendToResult(".");
   else if (k === "+" || k === "-" || k === "*" || k === "/") operatorToResult(k);
-  else if (k === "^") operatorToResult("^");
-  else if (k === "(" || k === ")") bracketToResult(k);
-  else if (k === "%") percentToResult();
-  // Letters build function names / constants: type "sin(30)", "sqrt(9)", "pi", "ans"
-  else if (/^[a-zA-Z]$/.test(k)) appendToResult(k.toLowerCase());
   else if (k === "Enter" || k === "=") { e.preventDefault(); calculateResult(); }
   else if (k === "Backspace") backspace();
-  else if (k === "Escape") clearResult();
+  else if (k === "Escape") clearResult();    // AC
+  else if (k === "Delete") clearEntry();     // CE
 });
