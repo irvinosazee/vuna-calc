@@ -1,55 +1,80 @@
-# Pipeline Guide (GitHub Actions → cPanel)
+# Pipeline Guide (GitHub Actions → Docker Hub + cPanel/FTP)
 
 ## Flow
 ```
 push to main ──▶ GitHub Actions
-                 ├── ci: npm ci → lint → test (Jest + coverage)
-                 └── deploy (needs ci): npm run build → rsync dist/ over SSH
-                                        └─▶ /home/irvin.vudse26.cloud/public_html
-                                            └─▶ http://irvin.vudse26.cloud
-PRs run ci only (no deploy).
+                 ├── ci      : npm ci → lint → test (Jest + coverage)
+                 ├── docker  : build image → push to Docker Hub   (needs ci)
+                 └── deploy  : npm run build → FTP dist/ into public_html (needs ci)
+                                   └─▶ http://irvin.vudse26.cloud
+PRs run ci only (no docker, no deploy).
 ```
 
-## CI/CD stages (`.github/workflows/ci-cd.yml`)
-- **ci:** `npm ci` → `npm run lint` → `npm test` (coverage thresholds: branches 70,
-  functions/lines/statements 80). Coverage uploaded as an artifact.
-- **deploy:** builds `dist/` and rsyncs it into `public_html` over SSH using a dedicated
-  deploy key. `--delete` mirrors the folder (server dirs `cgi-bin` / `.well-known` excluded).
+Three jobs, all defined in `.github/workflows/ci-cd.yml`:
 
-## One-time setup
+- **ci** — `npm ci` → `npm run lint` → `npm test` (coverage thresholds: branches 70,
+  functions/lines/statements 80). Coverage uploaded as an artifact. Runs on every push and PR.
+- **docker** — builds the multi-stage `Dockerfile` (Node build → nginx serve) and pushes
+  `irvinuyi/vuna-calc:latest` + a commit-SHA tag to **Docker Hub**. Runs on push to `main`.
+- **deploy** — builds `dist/` and uploads it over **FTP** into `public_html`. Runs on push
+  to `main`. The live site updates automatically.
 
-### 1. New GitHub repo
-```bash
-git remote add origin git@github.com:USERNAME/vuna-calc.git
-git push -u origin main
-```
+`docker` and `deploy` both `needs: [ci]`, so a failing test blocks both — broken code never
+ships and never gets published as an image.
 
-### 2. Generate a dedicated deploy key and authorise it on the server
-```bash
-# locally
-ssh-keygen -t ed25519 -C "github-actions-deploy" -f ~/.ssh/vuna_deploy -N ""
+---
 
-# authorise the PUBLIC key on the server (one password login, then rotate the password)
-ssh-copy-id -i ~/.ssh/vuna_deploy.pub -p 22 irvin@159.198.47.177
-#   OR cPanel → SSH Access → Manage SSH Keys → Import → Authorize
+## Why FTP (not SSH/rsync)?
 
-# test
-ssh -i ~/.ssh/vuna_deploy -p 22 irvin@159.198.47.177 'echo OK && ls public_html'
-```
+The server runs **CyberPanel**, and its SSH is locked down for this account:
+- SSH user `irvin4909` is a **no-login** account (its shell prints a banner that corrupts
+  SFTP — "Received message too long").
+- SSH user `irvin` is a **restricted shell** (rbash) that closes SFTP and blocks
+  `ssh-copy-id`.
 
-### 3. Add GitHub Secrets (repo → Settings → Secrets and variables → Actions)
+So key-based SSH/rsync isn't possible here. **CyberPanel's FTP service is separate from SSH**
+and works fine, so deployment uses an FTP account (`irvin_deploy`) scoped to the website,
+uploading into `public_html`.
+
+## Why Docker builds but doesn't run on the server
+
+cPanel/CyberPanel shared hosting **serves static files** from `public_html` — there is no
+Docker daemon for your user, so a container can't *run* there. The Docker requirement from the
+lab manual is satisfied by **building the image and pushing it to Docker Hub** in CI (the
+"containerize + registry" stages). The image (`nginx` serving the built calculator) is a real,
+runnable artifact — just hosted on Docker Hub, while the live site is served by cPanel.
+
+---
+
+## One-time setup (already done for this repo)
+
+### 1. GitHub repo
+`github.com/irvinosazee/vuna-calc` (private). Pushed to `main`.
+
+### 2. FTP account (CyberPanel)
+CyberPanel → **Databases & FTP → Create FTP Account** → website `irvin.vudse26.cloud`,
+username `deploy` (becomes `irvin_deploy`), set a password, leave Path empty (home dir
+contains `public_html`).
+
+### 3. Docker Hub access token
+hub.docker.com → **Account settings → Personal access tokens → Generate** (Read & Write).
+
+### 4. GitHub Secrets (repo → Settings → Secrets and variables → Actions)
 | Secret | Value |
 |--------|-------|
-| `SSH_HOST` | `159.198.47.177` |
-| `SSH_USER` | `irvin` |
-| `SSH_PORT` | `22` |
-| `SSH_PRIVATE_KEY` | contents of `~/.ssh/vuna_deploy` (the private key) |
+| `FTP_SERVER` | `159.198.47.177` |
+| `FTP_USERNAME` | `irvin_deploy` |
+| `FTP_PASSWORD` | the FTP account password |
+| `DOCKERHUB_USERNAME` | `irvinuyi` |
+| `DOCKERHUB_TOKEN` | Docker Hub access token |
 
-`DEPLOY_PATH` is set in the workflow (`/home/irvin.vudse26.cloud/public_html`).
+The FTP `server-dir` (`public_html/`) is set in the workflow.
 
-### 4. Push and watch
-Push to `main`, open the **Actions** tab, watch `ci` then `deploy` run, then refresh
-`http://irvin.vudse26.cloud` to see the change live.
+### 5. Push and watch
+Push to `main` → **Actions** tab → `ci` → `docker` + `deploy` → refresh
+`http://irvin.vudse26.cloud`.
+
+---
 
 ## How this maps to Mr. Iyke's manual (`CICD_Pipeline_Lab_Manual.docx`)
 | Manual concept | Here |
@@ -57,12 +82,22 @@ Push to `main`, open the **Actions** tab, watch `ci` then `deploy` run, then ref
 | Node/Express app | static calculator (no server process) |
 | Jest + coverage gate | same (on `src/calculator.js`) |
 | ESLint | same (flat config) |
-| Docker image + registry | not used — cPanel serves static files directly |
-| SSH deploy to Linux server | **same** — rsync over SSH into `public_html` |
-| GitHub Secrets for SSH | `SSH_HOST/USER/PORT/PRIVATE_KEY` |
-| Post-deploy smoke test | refresh the live domain |
+| Multi-stage Dockerfile, non-root nginx | same (`Dockerfile`) |
+| Build image + push to Docker Hub | **same** (`docker` job → `irvinuyi/vuna-calc`) |
+| Deploy to a Linux server | **FTP** into cPanel `public_html` (server can't run containers) |
+| GitHub Secrets for deploy creds | `FTP_*` + `DOCKERHUB_*` |
+| Post-deploy smoke test | refresh the live domain / `curl` it |
+
+---
 
 ## Security
-- Rotate the cPanel and SSH passwords that were shared.
-- The pipeline uses a dedicated SSH **key**, never a password; the private key lives only
-  in `SSH_PRIVATE_KEY` (GitHub Secret) and is never committed.
+- Rotate the cPanel password, the original `irvin` SSH password, the FTP deploy password, and
+  the Docker Hub token periodically — all are stored as encrypted GitHub Secrets, never in the
+  repo.
+- `.gitignore` excludes `.env`, keys, `node_modules`, `dist`, `coverage`.
+- The calculator has no `eval()` (safe evaluator), so no arbitrary-code-execution surface.
+- FTP sends credentials in cleartext; the account is a dedicated, scoped deploy user, and the
+  password is easy to rotate. Upgrade path: switch `protocol: ftp` → `ftps` in the workflow if
+  the host's TLS cert is trusted.
+
+See `docs/OPERATING.md` for day-to-day usage.

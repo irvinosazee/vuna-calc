@@ -14,6 +14,7 @@ CI/CD pipeline that auto-deploys to cPanel.
 - Keyboard input (digits, operators, Enter, Backspace, Esc = AC, Delete = CE)
 - Neumorphic soft-UI with light/dark theme
 - No `eval()` — a safe expression evaluator (tokenizer → shunting-yard → RPN)
+- Containerised — published as `irvinuyi/vuna-calc` on Docker Hub by CI
 
 ## Local development
 ```bash
@@ -28,6 +29,12 @@ python3 -m http.server 8000   # then open http://localhost:8000
 | Stage | Tool | When |
 |-------|------|------|
 | Lint & Test | ESLint + Jest | every PR + push to main |
-| Deploy | rsync over SSH → cPanel `public_html` | push to `main` |
+| Docker Build & Push | Docker → Docker Hub (`irvinuyi/vuna-calc`) | push to `main` |
+| Deploy | FTP → cPanel `public_html` (`http://irvin.vudse26.cloud`) | push to `main` |
 
-See `docs/PIPELINE.md` for the full guide and one-time server setup.
+> Hosting note: the server is **CyberPanel** with SSH locked down, so deploy uses **FTP**;
+> Docker can't *run* on the shared host, so CI **builds + pushes** the image instead.
+
+- **`docs/OPERATING.md`** — how to run, update, watch, and roll back the pipeline.
+- **`docs/PIPELINE.md`** — full architecture, setup, and lab-manual mapping.
+- **`docs/DEFENSE.md`** — defense crib sheet (demo script + Q&A).
