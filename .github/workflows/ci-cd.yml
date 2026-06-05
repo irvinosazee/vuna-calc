@@ -9,10 +9,8 @@ on:
 permissions:
   contents: read
 
-env:
-  DEPLOY_PATH: /home/irvin.vudse26.cloud/public_html
-
 jobs:
+  # ── 1. Lint & test ───────────────────────────────────────────────
   ci:
     name: Lint & Test
     runs-on: ubuntu-latest
@@ -43,8 +41,39 @@ jobs:
           path: coverage/
           retention-days: 14
 
+  # ── 2. Build & push Docker image to Docker Hub ───────────────────
+  docker:
+    name: Docker Build & Push
+    runs-on: ubuntu-latest
+    needs: [ci]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/vuna-calc:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/vuna-calc:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ── 3. Deploy the static site to cPanel via FTP ──────────────────
   deploy:
-    name: Deploy to cPanel
+    name: Deploy to cPanel (FTP)
     runs-on: ubuntu-latest
     needs: [ci]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -67,14 +96,12 @@ jobs:
       - name: Build site (dist/)
         run: npm run build
 
-      - name: Deploy to cPanel via rsync over SSH
-        uses: easingthemes/ssh-deploy@v5.1.0
+      - name: Deploy via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          REMOTE_HOST:     ${{ secrets.SSH_HOST }}
-          REMOTE_USER:     ${{ secrets.SSH_USER }}
-          REMOTE_PORT:     ${{ secrets.SSH_PORT }}
-          SOURCE:          "dist/"
-          TARGET:          ${{ env.DEPLOY_PATH }}
-          ARGS:            "-rltgoDzvO --delete"
-          EXCLUDE:         "/cgi-bin/, /.well-known/"
+          server:    ${{ secrets.FTP_SERVER }}
+          username:  ${{ secrets.FTP_USERNAME }}
+          password:  ${{ secrets.FTP_PASSWORD }}
+          protocol:  ftp
+          local-dir: ./dist/
+          server-dir: ./public_html/
