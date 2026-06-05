@@ -21,7 +21,7 @@ edit code → git push (main)
    ▼             ▼                            ▼
  ci             docker                       deploy
  lint + test    build image →  Docker Hub    build → FTP → public_html
- (the gate)     irvinuyi/vuna-calc:latest    http://<your-domain>
+ (the gate)     usernameuyi/vuna-calc:latest    http://<your-domain>
 ```
 
 Three GitHub Actions jobs. `ci` must pass before `docker` and `deploy` run. A push to `main`
@@ -44,11 +44,11 @@ gh --version      # optional but makes repo creation 1 command
 
 | Placeholder | Meaning | Example (mine) |
 |---|---|---|
-| `<GH_USERNAME>` | GitHub username | `irvinosazee` |
+| `<GH_USERNAME>` | GitHub username | `username` |
 | `<REPO_NAME>` | new repo name | `vuna-calc` |
-| `<DOMAIN>` | your live subdomain | `irvin.vudse26.cloud` |
+| `<DOMAIN>` | your live subdomain | `username.vudse26.cloud` |
 | `<FTP_SERVER>` | server IP | `159.198.47.177` |
-| `<DOCKERHUB_USERNAME>` | Docker Hub username | `irvinuyi` |
+| `<DOCKERHUB_USERNAME>` | Docker Hub username | `username` |
 
 > 🔐 **Never commit passwords or keys.** They go only into **GitHub Secrets** (encrypted).
 > Change any password you typed somewhere shared after you're done.
@@ -263,8 +263,8 @@ What I actually hit (so you recognise it):
 - **cPanel:** **FTP Accounts** → create one, directory `public_html`.
 
 **Find your exact FTP username — don't trust the preview.** CyberPanel showed me a side-preview
-`irvin_deploy` but a success banner saying `irvin.vudse26.cloud_deploy`. **The one that actually
-logged in was `irvin_deploy`.** So test both. Your web files live in **`public_html`** inside
+`username_deploy` but a success banner saying `username.vudse26.cloud_deploy`. **The one that actually
+logged in was `username_deploy`.** So test both. Your web files live in **`public_html`** inside
 the FTP home.
 
 **Test the login from your terminal with `curl`** (works even without an FTP app):
@@ -289,7 +289,7 @@ Repo → **Settings → Secrets and variables → Actions → New repository sec
 | Secret | Value |
 |--------|-------|
 | `FTP_SERVER` | `<FTP_SERVER>` |
-| `FTP_USERNAME` | the username that logged in (e.g. `irvin_deploy`) |
+| `FTP_USERNAME` | the username that logged in (e.g. `username_deploy`) |
 | `FTP_PASSWORD` | your FTP password |
 | `DOCKERHUB_USERNAME` | `<DOCKERHUB_USERNAME>` |
 | `DOCKERHUB_TOKEN` | the `dckr_pat_…` token |
