@@ -138,7 +138,7 @@ export function buildLayout(levels: Level[]): TreeLayout {
           y: limb.end.y + (pseudoRandom(k + 2) - 0.25) * 2.0,
           z: Math.sin(a) * r,
         },
-        scale: 0.8 + pseudoRandom(k + 1) * 0.6,
+        scale: 0.8 + pseudoRandom(k + 0.5) * 0.6,
         reveal,
       });
     }
@@ -166,7 +166,8 @@ export function buildLayout(levels: Level[]): TreeLayout {
     foliage.push({
       pos: {
         x: top.x + Math.cos(a) * r,
-        y: trunkHeight + 0.4 + pseudoRandom(k + 2) * 1.8,
+        // +0.9 keeps the dome clear of the topmost 400-level course leaves.
+        y: trunkHeight + 0.9 + pseudoRandom(k + 2) * 1.8,
         z: top.z + Math.sin(a) * r,
       },
       scale: 1.6 + pseudoRandom(k + 1) * 1.0,
