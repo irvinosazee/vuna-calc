@@ -56,6 +56,7 @@ function boot(): void {
     rig.enter(camera);
     document.body.classList.toggle('mode-explore', next === 'explore');
   }
+  // Referenced via `void` so TS keeps it; Task 8's overlay wires real buttons to setMode.
   void setMode;
 
   window.addEventListener('resize', () => {

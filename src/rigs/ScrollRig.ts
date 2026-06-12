@@ -17,7 +17,7 @@ export class ScrollRig implements CameraRig {
   update(camera: THREE.PerspectiveCamera, dt: number): void {
     const max = document.documentElement.scrollHeight - window.innerHeight;
     this.progress = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
-    const target = this.curve.getPointAt(Math.min(0.999, easeInOut(this.progress)));
+    const target = this.curve.getPointAt(Math.max(0, Math.min(0.999, easeInOut(this.progress))));
     camera.position.lerp(target, 1 - Math.exp(-4 * dt));
     camera.lookAt(0, target.y + 1.0, 0);
   }

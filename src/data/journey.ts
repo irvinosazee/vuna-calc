@@ -41,7 +41,9 @@ export const introBeats: IntroBeat[] = [
 export const theme = {
   background: '#0a2e1d',
   trunk: '#3a6b3f',
-  fog: { color: '#0a2e1d', density: 0.026 },
+  // Fog tint sits mid-way up the CSS sky gradient so fogged geometry blends
+  // against both the dark ground and the mint canopy (canvas is alpha-composited).
+  fog: { color: '#16573a', density: 0.02 },
   particles: { desktop: 240, mobile: 80 },
   families: {
     SEN: '#34d399', // software engineering — bright emerald
