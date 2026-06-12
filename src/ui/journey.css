@@ -422,3 +422,33 @@ body.no-webgl #spacer {
   line-height: 1.45;
   color: #c4f0d8;
 }
+
+/* ── Walk-mode virtual joystick ────────────────────────────────── */
+
+.joystick {
+  position: fixed;
+  width: 110px;
+  height: 110px;
+  margin: -55px 0 0 -55px;
+  border: 2px solid rgba(150, 255, 190, 0.4);
+  border-radius: 50%;
+  background: rgba(6, 40, 24, 0.35);
+  display: none;
+  z-index: 7;
+  pointer-events: none;
+}
+
+.joystick.active {
+  display: block;
+}
+
+.joystick-nub {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 44px;
+  height: 44px;
+  margin: -22px 0 0 -22px;
+  border-radius: 50%;
+  background: rgba(52, 211, 153, 0.6);
+}

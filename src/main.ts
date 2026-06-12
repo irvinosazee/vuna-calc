@@ -6,6 +6,7 @@ import { JourneyTree } from './scene/tree';
 import { Environment } from './scene/environment';
 import { ScrollRig } from './rigs/ScrollRig';
 import { OrbitRig } from './rigs/OrbitRig';
+import { WalkRig } from './rigs/WalkRig';
 import type { CameraRig, Mode } from './rigs/types';
 import { createOverlay } from './ui/overlay';
 import { renderFallback } from './ui/fallback';
@@ -44,6 +45,7 @@ function boot(): void {
 
   const scrollRig = new ScrollRig(tree.layout.cameraPoints);
   const orbitRig = new OrbitRig(renderer.domElement, tree.layout.trunkHeight);
+  const walkRig = new WalkRig(renderer.domElement, isMobile);
   let mode: Mode = 'journey';
   let rig: CameraRig = scrollRig;
   const p0 = tree.layout.cameraPoints[0];
@@ -51,11 +53,12 @@ function boot(): void {
   rig.enter(camera);
 
   function setMode(next: Mode): void {
-    if (next === mode || next === 'walk') return; // walk arrives in the next task
+    if (next === mode) return;
     rig.dispose();
     mode = next;
-    rig = next === 'explore' ? orbitRig : scrollRig;
+    rig = next === 'explore' ? orbitRig : next === 'walk' ? walkRig : scrollRig;
     rig.enter(camera);
+    // Non-journey modes lock page scroll (class also used by explore).
     document.body.classList.toggle('mode-explore', next !== 'journey');
   }
 
