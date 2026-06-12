@@ -2,7 +2,7 @@
 
 **Date:** 2026-06-12
 **Status:** Approved design, pending implementation plan
-**Owner:** Irvin Ogbemudia Uyi Osazee (VUG/SEN/22/8386)
+**Owner:** Irvin  Uyi Osazee (VUG/SEN/22/8386)
 
 ## Summary
 

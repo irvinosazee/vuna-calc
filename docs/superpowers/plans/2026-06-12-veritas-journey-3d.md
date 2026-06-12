@@ -383,7 +383,7 @@ export interface IntroBeat {
 }
 
 export const student = {
-  name: 'Irvin Ogbemudia Uyi Osazee',
+  name: 'Irvin  Uyi Osazee',
   matric: 'VUG/SEN/22/8386',
   programme: 'Software Engineering',
   university: 'Veritas University, Abuja',

@@ -1,6 +1,6 @@
 
 Home
-UYI OSAZEE IRVIN OGBEMUDIA
+UYI OSAZEE IRVIN 
 User Image
 Veritas LogoVeritas E-Campus
  Dashboard
@@ -13,7 +13,7 @@ Student Course Registration
 Dashboard
 check-result
 Course Registration Form
-Name	IRVIN OGBEMUDIA UYI OSAZEE	Matric No	VUG/SEN/22/8386
+Name	IRVIN  UYI OSAZEE	Matric No	VUG/SEN/22/8386
 Faculty	Natural and Applied Sciences	Gender	Male
 Programme	Software Engineering	Department	Software Engineering
 ACADEMIC SESSION: 2022/2023	LEVEL: 100	SEMESTER: First Semester
@@ -56,7 +56,7 @@ Copyright © Veritas University Abuja 2026 .
 
 
 Home
-UYI OSAZEE IRVIN OGBEMUDIA
+UYI OSAZEE IRVIN 
 User Image
 Veritas LogoVeritas E-Campus
  Dashboard
@@ -69,7 +69,7 @@ Student Course Registration
 Dashboard
 check-result
 Course Registration Form
-Name	IRVIN OGBEMUDIA UYI OSAZEE	Matric No	VUG/SEN/22/8386
+Name	IRVIN  UYI OSAZEE	Matric No	VUG/SEN/22/8386
 Faculty	Natural and Applied Sciences	Gender	Male
 Programme	Software Engineering	Department	Software Engineering
 ACADEMIC SESSION: 2023/2024	LEVEL: 200	SEMESTER: First Semester
@@ -108,7 +108,7 @@ Copyright © Veritas University Abuja 2026 .
 
 
 Home
-UYI OSAZEE IRVIN OGBEMUDIA
+UYI OSAZEE IRVIN 
 User Image
 Veritas LogoVeritas E-Campus
  Dashboard
@@ -121,7 +121,7 @@ Student Course Registration
 Dashboard
 check-result
 Course Registration Form
-Name	IRVIN OGBEMUDIA UYI OSAZEE	Matric No	VUG/SEN/22/8386
+Name	IRVIN  UYI OSAZEE	Matric No	VUG/SEN/22/8386
 Faculty	Natural and Applied Sciences	Gender	Male
 Programme	Software Engineering	Department	Software Engineering
 ACADEMIC SESSION: 2024/2025	LEVEL: 300	SEMESTER: First Semester
@@ -158,7 +158,7 @@ Copyright © Veritas University Abuja 2026 .
 
 
 Home
-UYI OSAZEE IRVIN OGBEMUDIA
+UYI OSAZEE IRVIN 
 User Image
 Veritas LogoVeritas E-Campus
  Dashboard
@@ -171,7 +171,7 @@ Student Course Registration
 Dashboard
 check-result
 Course Registration Form
-Name	IRVIN OGBEMUDIA UYI OSAZEE	Matric No	VUG/SEN/22/8386
+Name	IRVIN  UYI OSAZEE	Matric No	VUG/SEN/22/8386
 Faculty	Natural and Applied Sciences	Gender	Male
 Programme	Software Engineering	Department	Software Engineering
 ACADEMIC SESSION: 2025/2026	LEVEL: 400	SEMESTER: First Semester

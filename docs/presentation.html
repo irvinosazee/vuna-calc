@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CI/CD Pipeline — Defense Presentation</title>
+<style>
+  :root{
+    --bg:#0f1320; --bg2:#161c2e; --card:#1b2236; --ink:#e8ecf6; --muted:#9aa6c4;
+    --accent:#6d8bff; --accent2:#39d4c8; --good:#46d369; --warn:#ffb454; --bad:#ff6b6b;
+    --mono:'SF Mono',ui-monospace,Menlo,Consolas,monospace;
+    --sans:'Segoe UI',system-ui,-apple-system,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:var(--sans)}
+  .deck{height:100vh;width:100vw;overflow:hidden;position:relative}
+  .slide{
+    position:absolute;inset:0;display:none;flex-direction:column;justify-content:center;
+    padding:6vh 8vw;animation:fade .35s ease;
+  }
+  .slide.active{display:flex}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  h1{font-size:3.2rem;line-height:1.1;margin:0 0 .4em;letter-spacing:-.5px}
+  h2{font-size:2.1rem;margin:0 0 .6em;color:#fff;letter-spacing:-.3px}
+  h2 .num{color:var(--accent);font-variant-numeric:tabular-nums;margin-right:.35em}
+  p,li{font-size:1.35rem;line-height:1.5;color:var(--ink)}
+  .muted{color:var(--muted)}
+  .accent{color:var(--accent)} .accent2{color:var(--accent2)}
+  .good{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+  ul{margin:.2em 0;padding-left:1.2em} li{margin:.35em 0}
+  code,pre{font-family:var(--mono)}
+  code{background:#0a0e1a;padding:.12em .4em;border-radius:6px;font-size:.92em;color:#cfe0ff}
+  pre{background:#0a0e1a;border:1px solid #283153;border-radius:12px;padding:1.1em 1.3em;
+      font-size:1.02rem;line-height:1.45;overflow:auto;color:#cfe0ff;margin:.4em 0}
+  .lead{font-size:1.6rem;color:var(--muted);max-width:60ch}
+  .grid{display:grid;gap:1em}
+  .cols-2{grid-template-columns:1fr 1fr} .cols-3{grid-template-columns:1fr 1fr 1fr}
+  .card{background:var(--card);border:1px solid #283153;border-radius:14px;padding:1.1em 1.3em}
+  .card h3{margin:0 0 .3em;font-size:1.25rem;color:#fff}
+  .card p,.card li{font-size:1.12rem}
+  .pill{display:inline-block;background:#243056;border:1px solid #34406e;border-radius:999px;
+        padding:.25em .8em;margin:.2em .3em .2em 0;font-size:1rem;color:#cdd8f7}
+  .tag{font-family:var(--mono);font-size:.95rem;color:var(--accent2)}
+  table{border-collapse:collapse;width:100%;font-size:1.15rem}
+  th,td{text-align:left;padding:.5em .7em;border-bottom:1px solid #283153}
+  th{color:var(--muted);font-weight:600}
+  .kicker{font-family:var(--mono);color:var(--accent2);letter-spacing:2px;text-transform:uppercase;
+          font-size:.95rem;margin-bottom:1em}
+  .big-center{align-items:center;text-align:center}
+  .footer{position:absolute;bottom:2.5vh;left:8vw;right:8vw;display:flex;justify-content:space-between;
+          color:var(--muted);font-size:.95rem;font-family:var(--mono)}
+  .bar{position:absolute;top:0;left:0;height:4px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s}
+  .hint{position:absolute;bottom:2.5vh;left:50%;transform:translateX(-50%);color:#4b5680;font-size:.85rem}
+  .flow{font-family:var(--mono);font-size:1.05rem;color:#cfe0ff;line-height:1.6}
+  .ok{color:var(--good)} .badge{font-family:var(--mono);font-size:.9rem;padding:.1em .5em;border-radius:6px;background:#13321f;color:#7ee29a;border:1px solid #1f5031}
+  @media print{
+    html,body,.deck{height:auto;overflow:visible}
+    .slide{display:flex!important;position:relative;page-break-after:always;height:100vh;inset:auto}
+    .bar,.hint,.footer{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+  <div class="bar" id="bar"></div>
+
+  <!-- 1 TITLE -->
+  <section class="slide big-center">
+    <div class="kicker">SEN 482 · DevOps CA · 30 marks</div>
+    <h1>Building a CI/CD Pipeline<br><span class="accent">from a commit to a live server</span></h1>
+    <p class="lead">GitHub Actions · Node 22 · Vite · Jest + Vitest · TypeScript · ESLint · Docker → Docker Hub · FTP → cPanel</p>
+    <p class="muted" style="margin-top:1.5em">Irvin Uyi Osazee · VUG/SEN/22/8386</p>
+  </section>
+
+  <!-- 2 WHAT IS CI/CD -->
+  <section class="slide">
+    <div class="kicker">The idea</div>
+    <h2>What CI/CD is — and why</h2>
+    <div class="grid cols-2">
+      <div class="card"><h3 class="accent">CI — Continuous Integration</h3>
+        <p>Every code change is automatically <b>built, linted and tested</b> the moment it's pushed. Defects are caught in minutes.</p></div>
+      <div class="card"><h3 class="accent2">CD — Continuous Deployment</h3>
+        <p>Every change that passes CI is automatically <b>packaged and shipped</b> — to a registry and to the live server — with no manual steps.</p></div>
+    </div>
+    <p style="margin-top:1em"><b>The problem it solves:</b> manual testing + "FTP-the-files-up by hand" is slow, error-prone and inconsistent. A pipeline makes it <span class="accent">automatic, repeatable and gated</span> — bad code can't reach production.</p>
+  </section>
+
+  <!-- 3 BIG PICTURE -->
+  <section class="slide">
+    <div class="kicker">The whole pipeline at a glance</div>
+    <h2>One push → three jobs → two outputs</h2>
+    <pre class="flow">
+ git push (main)
+       │
+       ▼  GitHub Actions
+ ┌──────────────────────────────────────────────────────┐
+ │  <span class="accent">ci</span>  lint · Jest · typecheck · Vitest · (coverage)   ← the GATE
+ │   │ passes
+ │   ├─▶ <span class="accent2">docker</span>  build image → push ───────────────▶ Docker Hub
+ │   └─▶ <span class="accent2">deploy</span>  vite build → FTP dist/ ───────────▶ cPanel public_html
+ └──────────────────────────────────────────────────────┘
+                                                  │
+                                                  ▼
+                                  http://irvin.vudse26.cloud (live)</pre>
+    <p class="muted">A push to <code>main</code> ships. A Pull Request runs <span class="accent">ci</span> only — review before it goes live.</p>
+  </section>
+
+  <!-- 4 STACK -->
+  <section class="slide">
+    <div class="kicker">Supporting components</div>
+    <h2>The toolchain (know what each does)</h2>
+    <div class="grid cols-3">
+      <div class="card"><h3>Engine</h3><p><b>GitHub Actions</b> — runs the pipeline on a push, config lives with the code.</p></div>
+      <div class="card"><h3>Build</h3><p><b>Node 22 + Vite</b> — bundles the site into <code>dist/</code>.</p></div>
+      <div class="card"><h3>Quality gates</h3><p><b>ESLint</b> (style) · <b>Jest</b> (calculator + coverage) · <b>tsc</b> (types) · <b>Vitest</b> (unit tests).</p></div>
+      <div class="card"><h3>Containerise</h3><p><b>Docker</b> multi-stage → <b>Docker Hub</b> registry.</p></div>
+      <div class="card"><h3>Deploy</h3><p><b>FTP</b> → <b>cPanel/CyberPanel</b> <code>public_html</code>.</p></div>
+      <div class="card"><h3>Secrets</h3><p><b>GitHub Secrets</b> — encrypted FTP + Docker Hub credentials.</p></div>
+    </div>
+  </section>
+
+  <!-- 5 STAGE 0 GIT -->
+  <section class="slide">
+    <div class="kicker">Stage 0 · the trigger</div>
+    <h2><span class="num">1.</span>Git: the commit & the push</h2>
+    <ul>
+      <li><b>Commit</b> = an immutable snapshot + a unique <b>SHA</b> hash (e.g. <code>89e729b…</code>).</li>
+      <li><code>git commit</code> records it <b>locally</b> — nothing has left your machine yet.</li>
+      <li><code>git push</code> uploads commits to GitHub and moves the remote's <code>main</code> pointer. <span class="accent">This push is the start button.</span></li>
+    </ul>
+    <p class="muted">That same SHA travels all the way through — it even becomes a <b>Docker image tag</b> (<code>vuna-calc:89e729b</code>), so a running image traces back to the exact source commit.</p>
+  </section>
+
+  <!-- 6 STAGE GITHUB EVENT + RUNNER -->
+  <section class="slide">
+    <div class="kicker">Stage 1 · GitHub fires the workflow</div>
+    <h2><span class="num">2.</span>Event → workflow → runner</h2>
+    <div class="grid cols-2">
+      <div class="card"><h3>The trigger</h3>
+        <pre>on:
+  push:         [ main ]   # deploy
+  pull_request: [ main ]   # test only</pre>
+        <p>GitHub matches the event to <code>.github/workflows/ci-cd.yml</code> and creates a <b>run</b>.</p></div>
+      <div class="card"><h3>The runner</h3>
+        <p>Each job gets a <b>fresh, throwaway Ubuntu VM</b> (<code>runs-on: ubuntu-latest</code>).</p>
+        <p><b>Clean every time → reproducible.</b> Nothing persists between jobs, so each re-runs <code>checkout</code> + <code>npm ci</code>.</p></div>
+    </div>
+  </section>
+
+  <!-- 7 JOB 1 CI -->
+  <section class="slide">
+    <div class="kicker">Job 1 · the quality gate</div>
+    <h2><span class="num">3.</span><span class="accent">ci</span> — lint &amp; test (5 gates)</h2>
+    <pre><span class="ok">✓</span> npm ci          <span class="muted"># clean, lockfile-exact install (deterministic)</span>
+<span class="ok">✓</span> npm run lint     <span class="muted"># ESLint — static code-quality check</span>
+<span class="ok">✓</span> npm test         <span class="muted"># Jest — calculator tests + COVERAGE gate (70/80/80/80)</span>
+<span class="ok">✓</span> npm run typecheck<span class="muted"># tsc --noEmit — TypeScript type safety</span>
+<span class="ok">✓</span> npm run test:unit<span class="muted"># Vitest — 21 unit tests</span>
+<span class="ok">✓</span> upload coverage  <span class="muted"># saved as a downloadable artifact</span></pre>
+    <p>If <b>any</b> step exits non-zero, the job fails and <span class="accent2">docker</span> + <span class="accent2">deploy</span> are <b>skipped</b>. <span class="accent">This is the gate — broken code can't ship.</span></p>
+  </section>
+
+  <!-- 8 JOB 2 DOCKER -->
+  <section class="slide">
+    <div class="kicker">Job 2 · containerise</div>
+    <h2><span class="num">4.</span><span class="accent2">docker</span> — build &amp; push to Docker Hub</h2>
+    <div class="grid cols-2">
+      <div class="card"><h3>Multi-stage Dockerfile</h3>
+        <pre>FROM node:22-alpine AS build
+... npm ci · lint · test · build
+FROM nginx:alpine AS production
+COPY --from=build /app/dist .</pre>
+        <p>Final image = <b>nginx + built files only</b> (~small, secure — no Node/tests).</p></div>
+      <div class="card"><h3>Build → login → push</h3>
+        <p><span class="pill">setup-buildx</span><span class="pill">login (secrets)</span><span class="pill">build-push</span></p>
+        <p>Pushes <code>irvinuyi/vuna-calc:latest</code> + <code>:&lt;sha&gt;</code>.</p>
+        <p class="muted">Runnable anywhere: <code>docker run -p 8080:80 …</code></p></div>
+    </div>
+  </section>
+
+  <!-- 9 JOB 3 DEPLOY -->
+  <section class="slide">
+    <div class="kicker">Job 3 · go live</div>
+    <h2><span class="num">5.</span><span class="accent2">deploy</span> — FTP to cPanel</h2>
+    <pre><span class="ok">✓</span> npm run build                 <span class="muted"># Vite → produces dist/ (the deployable files)</span>
+<span class="ok">✓</span> SamKirkland/FTP-Deploy-Action <span class="muted"># upload dist/ over FTP</span>
+       server:    secrets.FTP_SERVER
+       username:  secrets.FTP_USERNAME
+       password:  secrets.FTP_PASSWORD
+       local-dir:  ./dist/
+       server-dir: ./public_html/    <span class="muted"># cPanel's web root</span></pre>
+    <p>The browser hits <code>http://irvin.vudse26.cloud</code> → cPanel serves <code>public_html/index.html</code> → the site runs <b>in the browser</b>.</p>
+  </section>
+
+  <!-- 10 ORCHESTRATION -->
+  <section class="slide">
+    <div class="kicker">How the jobs are wired</div>
+    <h2><span class="num">6.</span>Orchestration: <code>needs</code> + <code>if</code></h2>
+    <pre class="flow">            ┌─▶ <span class="accent2">docker</span>   (needs ci · main+push only) → Docker Hub
+<span class="accent">ci</span> ─ pass ──┤
+            └─▶ <span class="accent2">deploy</span>   (needs ci · main+push only) → cPanel</pre>
+    <ul>
+      <li><code>needs: [ci]</code> → docker &amp; deploy wait for tests to pass. <b>The gate.</b></li>
+      <li><code>if: …main &amp;&amp; push</code> → they only fire on a real push to <code>main</code>; <b>PRs run ci only</b>.</li>
+      <li>docker &amp; deploy then run <b>in parallel</b> with each other.</li>
+    </ul>
+  </section>
+
+  <!-- 11 SECRETS / SECURITY -->
+  <section class="slide">
+    <div class="kicker">Security model</div>
+    <h2><span class="num">7.</span>Secrets &amp; hardening</h2>
+    <table>
+      <tr><th>Secret</th><th>Used by</th></tr>
+      <tr><td><code>FTP_SERVER / USERNAME / PASSWORD</code></td><td>deploy</td></tr>
+      <tr><td><code>DOCKERHUB_USERNAME / TOKEN</code></td><td>docker</td></tr>
+    </table>
+    <ul style="margin-top:.6em">
+      <li>Encrypted by GitHub, <b>masked in logs</b>, never in the repo.</li>
+      <li><code>permissions: contents: read</code> — least privilege for the auto token.</li>
+      <li>Docker Hub uses a <b>revocable access token</b>, not a password.</li>
+      <li>Repo is <b>private</b>; <code>.gitignore</code> blocks <code>.env</code>, keys, <code>node_modules</code>.</li>
+    </ul>
+  </section>
+
+  <!-- 12 TWO GOTCHAS -->
+  <section class="slide">
+    <div class="kicker">The two questions they'll probe</div>
+    <h2><span class="num">8.</span>Why FTP? Why Docker if it doesn't run?</h2>
+    <div class="grid cols-2">
+      <div class="card"><h3 class="warn">Why FTP, not SSH/rsync?</h3>
+        <p>The host is <b>CyberPanel</b> with SSH locked down — the website user is <b>no-login</b> (SFTP corrupts), the main user is a <b>restricted shell</b> (blocks keys/SFTP). FTP is a separate service that works.</p></div>
+      <div class="card"><h3 class="warn">Why build Docker if cPanel can't run it?</h3>
+        <p>Shared hosting has <b>no Docker daemon</b> for my user. So Docker satisfies the manual's <b>containerise + registry</b> stage; the image is a real, runnable artifact on Docker Hub. The live site is the static files.</p></div>
+    </div>
+  </section>
+
+  <!-- 13 LIFECYCLE TRACE -->
+  <section class="slide">
+    <div class="kicker">Put it together</div>
+    <h2><span class="num">9.</span>One commit, end to end</h2>
+    <ol>
+      <li><b>commit</b> → SHA recorded locally.</li>
+      <li><b>push</b> → GitHub <code>main</code> advances; a <b>run</b> starts.</li>
+      <li><b>ci</b> (VM A): checkout → npm ci → lint → Jest → typecheck → Vitest. <span class="badge">✓ ~30s</span></li>
+      <li>ci passing <b>unblocks</b> docker + deploy (parallel).</li>
+      <li><b>docker</b> (VM B): build multi-stage image → push <code>:latest</code> + <code>:sha</code>. <span class="badge">✓</span></li>
+      <li><b>deploy</b> (VM C): vite build → FTP <code>dist/</code> → <code>public_html</code>. <span class="badge">✓</span></li>
+      <li><b>cPanel</b> serves the new files → live site updated. <span class="accent">Under a minute, automatic.</span></li>
+    </ol>
+  </section>
+
+  <!-- 14 FAILURE MODES -->
+  <section class="slide">
+    <div class="kicker">Robustness</div>
+    <h2><span class="num">10.</span>What blocks what</h2>
+    <table>
+      <tr><th>If this fails…</th><th>…then</th></tr>
+      <tr><td>Lint / a test / low coverage / typecheck</td><td><b class="bad">ci fails</b> → docker + deploy <b>skipped</b></td></tr>
+      <tr><td>Docker Hub login</td><td>docker fails; deploy still runs (independent)</td></tr>
+      <tr><td>FTP auth (530)</td><td>deploy fails; site unchanged</td></tr>
+      <tr><td>Push to a non-<code>main</code> branch</td><td>only ci runs — by design</td></tr>
+    </table>
+    <p style="margin-top:.6em"><span class="accent">Key property:</span> the test gate protects production — <code>deploy needs ci</code>, so broken code cannot deploy.</p>
+  </section>
+
+  <!-- 15 DEMO -->
+  <section class="slide">
+    <div class="kicker">Live demonstration</div>
+    <h2><span class="num">11.</span>Prove it's automatic</h2>
+    <pre>1.  edit something visible  (e.g. a colour)
+2.  git commit -m "tweak"  &amp;&amp;  git push
+3.  open the <span class="accent">Actions</span> tab  →  watch ci → docker → deploy go green
+4.  refresh  http://irvin.vudse26.cloud  →  change is live (~30s)
+5.  bonus:  docker run -p 8080:80 irvinuyi/vuna-calc:latest</pre>
+    <p class="accent" style="font-size:1.5rem">"I pushed one commit — and it tested, containerised, and deployed itself. That is CI/CD."</p>
+  </section>
+
+  <!-- 16 SUMMARY -->
+  <section class="slide big-center">
+    <div class="kicker">In one breath</div>
+    <h2>The whole defense, summarised</h2>
+    <p class="lead" style="max-width:70ch">Push to <code>main</code> → GitHub Actions runs <b>five quality gates</b> → if green, it <b>builds &amp; pushes a Docker image</b> and <b>deploys the built site over FTP</b> to cPanel — <span class="accent">tested, containerised, and live, with zero manual steps.</span></p>
+    <p class="muted" style="margin-top:1.5em">Repo: github.com/irvinosazee/vuna-calc · Image: irvinuyi/vuna-calc · Live: irvin.vudse26.cloud</p>
+    <p class="accent2" style="margin-top:1em;font-size:1.4rem">Thank you — questions?</p>
+  </section>
+
+  <div class="footer"><span>VUNA Calc · CI/CD Pipeline</span><span id="cnt"></span></div>
+  <div class="hint">← → / Space to navigate · F fullscreen · Cmd/Ctrl-P → Save as PDF</div>
+</div>
+
+<script>
+  const slides=[...document.querySelectorAll('.slide')];
+  let i=0;
+  const bar=document.getElementById('bar'),cnt=document.getElementById('cnt');
+  function show(n){
+    i=Math.max(0,Math.min(slides.length-1,n));
+    slides.forEach((s,k)=>s.classList.toggle('active',k===i));
+    bar.style.width=((i+1)/slides.length*100)+'%';
+    cnt.textContent=(i+1)+' / '+slides.length;
+  }
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();show(i+1);}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();show(i-1);}
+    else if(e.key==='Home'){show(0);} else if(e.key==='End'){show(slides.length-1);}
+    else if(e.key.toLowerCase()==='f'){if(!document.fullscreenElement)document.documentElement.requestFullscreen();else document.exitFullscreen();}
+  });
+  document.getElementById('deck').addEventListener('click',e=>{ if(e.clientX > window.innerWidth*0.5) show(i+1); else show(i-1); });
+  show(0);
+</script>
+</body>
+</html>
