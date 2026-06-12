@@ -89,6 +89,12 @@ Five upgrades to the live site:
   ordered like leaves). Course leaves get a size bump (0.42 → 0.5 base).
 - **Twigs:** 2–3 thin cylinders per limb from limb tip toward the leaf
   cloud, same bark material, visibility tied to the limb.
+- **Crown canopy:** the trunk currently ends bare like a pillar — fix by
+  capping it with a proper treetop: a dome of 8–12 large foliage clusters
+  (icosahedra r 1.6–2.6, the brightest greens) packed around and above the
+  trunk tip, giving the classic stylized-tree silhouette. Part of
+  `foliageMesh`; revealed last in the growth order. The Climb's crown phase
+  ends with the avatar standing within this canopy dome.
 - **Ground life:** instanced grass tufts (small cones, ~60 desktop / ~30
   mobile) and flowers (~20/10) scattered radius 3–30 via `pseudoRandom`,
   in `environment.ts`.
