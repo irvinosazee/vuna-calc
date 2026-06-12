@@ -32,6 +32,9 @@ export class WalkRig implements CameraRig {
   ) {}
 
   enter(camera: THREE.PerspectiveCamera): void {
+    // Defensive: never double-register if enter() is called twice.
+    this.dispose();
+
     camera.position.set(0, EYE_HEIGHT, 14);
     this.yaw = 0; // facing -z = facing the trunk from +z
     this.pitch = 0.15; // a hint upward, toward the canopy
@@ -55,10 +58,12 @@ export class WalkRig implements CameraRig {
 
     on(this.dom, 'pointerdown', (e: PointerEvent) => {
       if (this.touch && e.clientX < window.innerWidth / 2 && this.moveId === null) {
+        this.dom.setPointerCapture(e.pointerId);
         this.moveId = e.pointerId;
         this.moveVec = { x: 0, y: 0 };
         this.showJoystick(e.clientX, e.clientY);
       } else if (this.lookId === null) {
+        this.dom.setPointerCapture(e.pointerId);
         this.lookId = e.pointerId;
         this.lookLast = { x: e.clientX, y: e.clientY };
       }
