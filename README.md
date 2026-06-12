@@ -35,6 +35,8 @@ python3 -m http.server 8000   # then open http://localhost:8000
 > Hosting note: the server is **CyberPanel** with SSH locked down, so deploy uses **FTP**;
 > Docker can't *run* on the shared host, so CI **builds + pushes** the image instead.
 
-- **`docs/OPERATING.md`** — how to run, update, watch, and roll back the pipeline.
-- **`docs/PIPELINE.md`** — full architecture, setup, and lab-manual mapping.
+### Docs
+- **`docs/CICD_DEEP_DIVE.md`** — full pipeline explanation, commit → live server (study for the defense).
 - **`docs/DEFENSE.md`** — defense crib sheet (demo script + Q&A).
+- **`docs/OPERATING.md`** — how to run, update, watch, and roll back the pipeline.
+- **`docs/COURSEMATE_WALKTHROUGH.md`** — generic step-by-step guide to build this from scratch.

@@ -1,13 +1,12 @@
-# SEN 482 DevOps CA — In-Depth Walkthrough (my exact flow)
+# SEN 482 DevOps CA — In-Depth Walkthrough
 
-This is the **full, follow-along** version of how I built and shipped the CA — every step,
-every command, and the real problems I hit and how I solved them. Follow it top to bottom and
-you'll end with the same result: a stripped calculator, **tested**, **containerised on Docker
-Hub**, and **auto-deployed to your live subdomain** on every `git push`.
+A **full, follow-along** guide to building and shipping the CA: a stripped calculator,
+**tested**, **containerised on Docker Hub**, and **auto-deployed to your live subdomain** on
+every `git push`. It includes the real problems you'll hit and how to get past them.
 
-> It's written so you copy commands almost verbatim — only swap the `<PLACEHOLDERS>` for your
-> own values. Your *custom feature* will differ from mine (mine was combination & permutation,
-> `nCr`/`nPr`); everything else is the same.
+> Copy the commands almost verbatim — only swap each `<PLACEHOLDER>` for your own value.
+> Your custom feature will differ (e.g. %, memory, square root, combinations); everything else
+> is identical.
 
 ---
 
@@ -17,11 +16,11 @@ Hub**, and **auto-deployed to your live subdomain** on every `git push`.
 edit code → git push (main)
                  │
                  ▼  GitHub Actions runs automatically
-   ┌─────────────┼──────────────────────────┐
-   ▼             ▼                            ▼
- ci             docker                       deploy
- lint + test    build image →  Docker Hub    build → FTP → public_html
- (the gate)     usernameuyi/vuna-calc:latest    http://<your-domain>
+   ┌─────────────┼────────────────────────────────────┐
+   ▼             ▼                                      ▼
+ ci             docker                                 deploy
+ lint + test    build image → Docker Hub               build → FTP → public_html
+ (the gate)     <DOCKERHUB_USERNAME>/<REPO_NAME>        http://<DOMAIN>
 ```
 
 Three GitHub Actions jobs. `ci` must pass before `docker` and `deploy` run. A push to `main`
@@ -40,15 +39,15 @@ git --version
 gh --version      # optional but makes repo creation 1 command
 ```
 
-**Collect your personal values** (from the course-rep's sheet + your own choices). Keep a note:
+**Collect your values** (from the course-rep's sheet + your own choices). Keep a note:
 
-| Placeholder | Meaning | Example (mine) |
+| Placeholder | Meaning | How to get it |
 |---|---|---|
-| `<GH_USERNAME>` | GitHub username | `username` |
-| `<REPO_NAME>` | new repo name | `vuna-calc` |
-| `<DOMAIN>` | your live subdomain | `username.vudse26.cloud` |
-| `<FTP_SERVER>` | server IP | `159.198.47.177` |
-| `<DOCKERHUB_USERNAME>` | Docker Hub username | `username` |
+| `<GH_USERNAME>` | your GitHub username | github.com |
+| `<REPO_NAME>` | your new repo name | you choose, e.g. `calc-cicd` |
+| `<DOMAIN>` | your live subdomain | the rep's sheet (e.g. `yourname.<class-domain>`) |
+| `<FTP_SERVER>` | the shared server's IP | the rep's sheet |
+| `<DOCKERHUB_USERNAME>` | your Docker Hub username | hub.docker.com |
 
 > 🔐 **Never commit passwords or keys.** They go only into **GitHub Secrets** (encrypted).
 > Change any password you typed somewhere shared after you're done.
@@ -78,9 +77,9 @@ if (typeof module !== 'undefined' && module.exports) {
   module.exports = { evaluateExpression, myFeature };
 }
 ```
-> I replaced `eval()` with a small **tokenizer → shunting-yard → RPN** evaluator. You don't
-> have to go that far, but "no `eval()`" is a strong defense point. The key is: pure functions
-> that take input and return a result.
+> Replacing `eval()` with a small **tokenizer → shunting-yard → RPN** evaluator is a strong
+> defense point. You don't have to go that far — the key is **pure functions** that take input
+> and return a result, with no DOM.
 
 `assets/js/script.js` — the wiring only (button clicks, keyboard, updating the display) that
 **calls** the engine.
@@ -209,8 +208,8 @@ docs
 .DS_Store
 ```
 
-> **Why Docker if cPanel can't run it?** Right — shared hosting serves static files; it has no
-> Docker daemon. So the pipeline **builds the image and pushes it to Docker Hub** (the manual's
+> **Why Docker if cPanel can't run it?** Shared hosting serves static files; it has no Docker
+> daemon. So the pipeline **builds the image and pushes it to Docker Hub** (the manual's
 > "containerise + registry" stage). The live site is still the static files on cPanel. You can
 > prove the image runs with `docker run -p 8080:80 <DOCKERHUB_USERNAME>/<REPO_NAME>:latest`.
 
@@ -225,12 +224,12 @@ git add .
 git commit -m "feat: stripped calculator with tests and Dockerfile"
 ```
 
-Create the repo (I used `gh`, which does it in one command — keep it **private**):
+Create the repo with `gh` (one command — keep it **private**):
 ```bash
 gh auth login                                  # if not already logged in
 gh repo create <REPO_NAME> --private --source=. --remote=origin
 ```
-> No `--push` yet — we push **after** the secrets exist, so the first run can actually deploy.
+> No `--push` yet — push **after** the secrets exist, so the first run can actually deploy.
 > Prefer the website? Make an empty repo on github.com (no README), then
 > `git remote add origin https://github.com/<GH_USERNAME>/<REPO_NAME>.git`.
 
@@ -248,13 +247,13 @@ gh repo create <REPO_NAME> --private --source=. --remote=origin
 ## Part 6 — Hosting: use **FTP** (this is the part that fights you)
 
 > **The big lesson:** these shared accounts (cPanel / **CyberPanel**) usually **lock down SSH**,
-> so SSH keys and `rsync` won't work. I burned an hour on SSH before switching to **FTP**, which
-> is a separate service that just works. Save yourself the time — go straight to FTP.
+> so SSH keys and `rsync` won't work. Don't waste time on SSH — go straight to **FTP**, a
+> separate service that just works.
 
-What I actually hit (so you recognise it):
-- CyberPanel's **"Add SSH Key"** button looked promising but **didn't save** the key.
-- `ssh-copy-id` failed with `rbash: exec: restricted` (restricted shell).
-- The website SSH user was **no-login** — SFTP died with `Received message too long`.
+What you'll likely run into on CyberPanel (so you recognise it):
+- The **"Add SSH Key"** button looks promising but **silently doesn't save** the key.
+- `ssh-copy-id` fails with `rbash: exec: restricted` (the account's shell is restricted).
+- The website's SSH user is **no-login**, so SFTP dies with `Received message too long`.
 
 **So: create an FTP account instead.**
 
@@ -262,18 +261,18 @@ What I actually hit (so you recognise it):
   FTP Username `deploy` → set/note a password → **leave Path empty** → **Create FTP Account**.
 - **cPanel:** **FTP Accounts** → create one, directory `public_html`.
 
-**Find your exact FTP username — don't trust the preview.** CyberPanel showed me a side-preview
-`username_deploy` but a success banner saying `username.vudse26.cloud_deploy`. **The one that actually
-logged in was `username_deploy`.** So test both. Your web files live in **`public_html`** inside
-the FTP home.
+**Find your exact FTP username — don't trust the form preview.** CyberPanel may show one form in
+a side-preview (like `<owner>_deploy`) but a different one in the success banner (like
+`<domain>_deploy`). **Test both** and use whichever logs in. Your web files live in
+**`public_html`** inside the FTP home.
 
-**Test the login from your terminal with `curl`** (works even without an FTP app):
+**Test the login from your terminal with `curl`** (works without an FTP app):
 ```bash
 curl --user "<FTP_USERNAME>:<FTP_PASSWORD>" "ftp://<FTP_SERVER>/public_html/"
 ```
 - `530 Login authentication failed` → wrong username **or** password. Re-check the exact
-  username; if unsure, in CyberPanel reset the FTP account password to a **plain letters+digits**
-  value (special characters caused mismatches for me) and try again.
+  username; if unsure, reset the FTP password to **plain letters+digits** (special characters
+  like `# @ %` can cause mismatches) and try again.
 - A directory listing → 🎉 you're in. Confirm you can write:
 ```bash
 echo hi > t.txt
@@ -289,7 +288,7 @@ Repo → **Settings → Secrets and variables → Actions → New repository sec
 | Secret | Value |
 |--------|-------|
 | `FTP_SERVER` | `<FTP_SERVER>` |
-| `FTP_USERNAME` | the username that logged in (e.g. `username_deploy`) |
+| `FTP_USERNAME` | the username that logged in (e.g. `<owner>_deploy`) |
 | `FTP_PASSWORD` | your FTP password |
 | `DOCKERHUB_USERNAME` | `<DOCKERHUB_USERNAME>` |
 | `DOCKERHUB_TOKEN` | the `dckr_pat_…` token |
@@ -308,7 +307,7 @@ gh secret list
 
 ## Part 8 — The workflow file
 
-`.github/workflows/ci-cd.yml` (change the **bold** values to yours):
+`.github/workflows/ci-cd.yml` (replace `<REPO_NAME>` and `<DOMAIN>` with yours):
 ```yaml
 name: CI/CD
 
@@ -430,16 +429,16 @@ Refresh `http://<DOMAIN>` — the change appears in ~30s with no manual upload. 
 
 ---
 
-## The traps I hit (so you don't)
+## The traps to watch for
 
-| Trap | What happened | Fix |
+| Trap | What happens | Fix |
 |------|---------------|-----|
-| SSH keys on CyberPanel | "Add Key" didn't save; `rbash: restricted`; SFTP "message too long" | Don't use SSH on shared hosting — use **FTP**. |
-| Wrong FTP username | Preview said `x_deploy`, banner said `domain_deploy`; only one logged in | **Test the login** with `curl`; use whichever returns a listing. |
-| FTP `530` with special-char password | Generated password with `#@%` mismatched | Reset to **letters+digits only**. |
+| SSH keys on CyberPanel | "Add Key" doesn't save; `rbash: restricted`; SFTP "message too long" | Don't use SSH on shared hosting — use **FTP**. |
+| Wrong FTP username | The panel shows two different username forms; only one logs in | **Test the login** with `curl`; use whichever returns a listing. |
+| FTP `530` with special-char password | A generated password with `# @ %` mismatches | Reset to **letters+digits only**. |
 | First deploy failed | Secrets weren't set before the first push | Create repo → add secrets → *then* push. |
-| Repo public would leak server IP | Docs contain the server IP/FTP user | Keep the repo **private**; add the lecturer as a collaborator. |
-| "Node 20 deprecated" warning | Scary-looking annotation | It's a future-dated warning, **not** a failure. |
+| Public repo leaks server details | Docs contain the server IP/FTP user | Keep the repo **private**; add the lecturer as a collaborator. |
+| "Node 20 deprecated" warning | A scary-looking annotation | A future-dated warning, **not** a failure. |
 
 ---
 
