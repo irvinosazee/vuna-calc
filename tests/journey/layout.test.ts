@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildLayout, pseudoRandom } from '../../src/journey/layout';
+import { buildLayout, pseudoRandom, trunkPointAt } from '../../src/journey/layout';
 import { levels, allCourses } from '../../src/data/journey';
 
 describe('buildLayout', () => {
@@ -57,5 +57,44 @@ describe('pseudoRandom', () => {
       expect(v).toBeGreaterThanOrEqual(0);
       expect(v).toBeLessThan(1);
     }
+  });
+});
+
+describe('tree dressing layout', () => {
+  const layout = buildLayout(levels);
+
+  it('builds a 7-point trunk spine anchored at the ground and reaching the top', () => {
+    expect(layout.trunkSpine).toHaveLength(7);
+    expect(Math.abs(layout.trunkSpine[0].x)).toBeLessThan(0.001);
+    expect(Math.abs(layout.trunkSpine[0].z)).toBeLessThan(0.001);
+    expect(layout.trunkSpine[0].y).toBe(0);
+    expect(layout.trunkSpine[6].y).toBeCloseTo(layout.trunkHeight);
+    for (let i = 1; i < 7; i++) expect(layout.trunkSpine[i].y).toBeGreaterThan(layout.trunkSpine[i - 1].y);
+  });
+
+  it('places 4 foliage clusters per semester plus a 10-cluster crown, reveals ascending', () => {
+    expect(layout.foliage).toHaveLength(8 * 4 + 10);
+    for (let i = 1; i < layout.foliage.length; i++) {
+      expect(layout.foliage[i].reveal).toBeGreaterThanOrEqual(layout.foliage[i - 1].reveal);
+    }
+    const crown = layout.foliage.slice(-10);
+    for (const c of crown) expect(c.pos.y).toBeGreaterThan(layout.trunkHeight);
+  });
+
+  it('gives every limb two finite twigs', () => {
+    expect(layout.twigs).toHaveLength(16);
+    for (const tw of layout.twigs) {
+      for (const p of [tw.start, tw.end]) {
+        expect(Number.isFinite(p.x) && Number.isFinite(p.y) && Number.isFinite(p.z)).toBe(true);
+      }
+    }
+  });
+
+  it('trunkPointAt tapers from base to top along the spine', () => {
+    expect(trunkPointAt(layout, 0).radius).toBeCloseTo(1.3);
+    expect(trunkPointAt(layout, layout.trunkHeight).radius).toBeCloseTo(0.4);
+    const mid = trunkPointAt(layout, layout.trunkHeight / 2);
+    expect(mid.radius).toBeGreaterThan(0.4);
+    expect(mid.radius).toBeLessThan(1.3);
   });
 });
