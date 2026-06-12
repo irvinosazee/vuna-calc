@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { levels, allCourses, totalUnits, courseFamily, theme } from '../../src/data/journey';
+import { levels, allCourses, totalUnits, courseFamily, theme, student, introBeats } from '../../src/data/journey';
 
 describe('journey data integrity', () => {
   it('has 4 levels, each with 2 semesters', () => {
@@ -36,10 +36,23 @@ describe('journey data integrity', () => {
     expect(courseFamily('SEN482')).toBe('LAB');
     expect(courseFamily('SEN290')).toBe('LAB');
     expect(courseFamily('SEN190')).toBe('LAB');
+  });
+
+  it('routes non-lab courses to their own families', () => {
     expect(courseFamily('SEN490')).toBe('SEN');
     expect(courseFamily('GST111')).toBe('GST');
     expect(courseFamily('PHY101')).toBe('SCI');
     expect(courseFamily('STA343')).toBe('SCI');
     expect(courseFamily('MTH101')).toBe('MTH');
+  });
+
+  it('student identity is populated', () => {
+    expect(student.matric).toMatch(/^VUG\/SEN\/\d{2}\/\d{4}$/);
+    expect(student.name).toBeTruthy();
+  });
+
+  it('intro beats reference the student data', () => {
+    expect(introBeats).toHaveLength(3);
+    expect(introBeats[1].text).toContain(student.matric);
   });
 });
