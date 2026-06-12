@@ -26,7 +26,7 @@ file: `src/data/journey.ts`.
 ## Pipeline at a glance
 | Stage | Tool | When |
 |-------|------|------|
-| Lint & Test | ESLint + Jest | every PR + push to main |
+| Lint & Test | ESLint + Jest (coverage) + tsc + Vitest | every PR + push to main |
 | Docker Build & Push | Docker → Docker Hub (`irvinuyi/vuna-calc`) | push to `main` |
 | Deploy | FTP → cPanel `public_html` (`http://irvin.vudse26.cloud`) | push to `main` |
 

@@ -30,10 +30,10 @@ ships; a Pull Request only tests.
 
 ## Part 0 — Before you start
 
-**Install:** Node.js v20, Git, VS Code, a terminal. Recommended: GitHub CLI (`gh`) and a free
+**Install:** Node.js v22, Git, VS Code, a terminal. Recommended: GitHub CLI (`gh`) and a free
 **Docker Hub** account. Check:
 ```bash
-node --version   # v20.x
+node --version   # v22.x
 npm --version
 git --version
 gh --version      # optional but makes repo creation 1 command
@@ -184,12 +184,12 @@ npm run build   # creates dist/
 
 `Dockerfile`:
 ```dockerfile
-FROM node:20-alpine AS build
+FROM node:22-alpine AS build
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . .
-RUN npm run lint && npm test && npm run build
+RUN npm run lint && npm test && npm run test:unit && npm run typecheck && npm run build
 
 FROM nginx:alpine AS production
 COPY --from=build /app/dist /usr/share/nginx/html
@@ -327,10 +327,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: '20', cache: 'npm' }
+        with: { node-version: '22', cache: 'npm' }
       - run: npm ci
       - run: npm run lint
       - run: npm test
+      - run: npm run typecheck
+      - run: npm run test:unit
       - uses: actions/upload-artifact@v4
         if: always()
         with: { name: coverage, path: coverage/, retention-days: 14 }
@@ -366,7 +368,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: '20', cache: 'npm' }
+        with: { node-version: '22', cache: 'npm' }
       - run: npm ci
       - run: npm run build
       - uses: SamKirkland/FTP-Deploy-Action@v4.3.5
@@ -438,7 +440,7 @@ Refresh `http://<DOMAIN>` — the change appears in ~30s with no manual upload. 
 | FTP `530` with special-char password | A generated password with `# @ %` mismatches | Reset to **letters+digits only**. |
 | First deploy failed | Secrets weren't set before the first push | Create repo → add secrets → *then* push. |
 | Public repo leaks server details | Docs contain the server IP/FTP user | Keep the repo **private**; add the lecturer as a collaborator. |
-| "Node 20 deprecated" warning | A scary-looking annotation | A future-dated warning, **not** a failure. |
+| Old node version warning | A scary-looking annotation | A future-dated warning, **not** a failure. Pipeline uses Node 22. |
 
 ---
 

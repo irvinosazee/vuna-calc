@@ -75,7 +75,7 @@ operators I defined.
 ```
 on: push→main, pull_request→main
 
-ci      (push + PR):  npm ci → lint → test (coverage gate) → upload coverage
+ci      (push + PR):  npm ci → lint → test (coverage gate) → typecheck → test:unit → upload coverage
 docker  (push→main):  build Dockerfile → push irvinuyi/vuna-calc:{latest,sha} to Docker Hub
 deploy  (push→main):  npm run build → FTP dist/ into public_html
 docker & deploy both: needs: [ci]   (failing tests block both)
@@ -134,7 +134,7 @@ GitHub repo settings, never in code.
 ## One-line answers to "explain X"
 
 - **Tokenizer / shunting-yard / RPN:** split → order by precedence → stack-evaluate.
-- **ESLint / Jest:** style checker / test runner; both gate CI.
+- **ESLint / Jest / tsc / Vitest:** style checker / Jest unit tests with coverage / TypeScript type check / Vitest unit tests; all four gate CI.
 - **`needs: ci`:** dependency that blocks docker+deploy behind passing tests.
 - **Docker Hub:** public registry where CI publishes the container image.
 - **FTP deploy:** uploads the built site into `public_html` over CyberPanel's FTP service.

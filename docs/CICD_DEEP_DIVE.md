@@ -56,7 +56,7 @@ test → containerise → deploy.
 ```
   Developer            GitHub                     GitHub Actions runners              Targets
  ┌─────────┐  push    ┌──────────┐   event   ┌──────────────────────────────┐
- │ git     │ ───────▶ │  repo    │ ────────▶ │  ci      (lint + Jest)        │
+ │ git     │ ───────▶ │  repo    │ ────────▶ │  ci      (lint + Jest + tsc + Vitest) │
  │ commit  │   main   │  (main)  │           │   │ pass                       │
  └─────────┘          └──────────┘           │   ├─▶ docker (build → push) ───┼─▶ Docker Hub
                                              │   └─▶ deploy (build → FTP) ────┼─▶ cPanel public_html
@@ -162,10 +162,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4          # clone the repo at this commit onto the runner
       - uses: actions/setup-node@v4        # install Node.js + enable npm caching
-        with: { node-version: '20', cache: 'npm' }
+        with: { node-version: '22', cache: 'npm' }
       - run: npm ci                         # clean, reproducible dependency install
       - run: npm run lint                   # ESLint — static code-quality check
       - run: npm test                       # Jest — unit tests + coverage gate
+      - run: npm run typecheck              # tsc --noEmit — TypeScript type checking
+      - run: npm run test:unit              # Vitest — journey data/layout/fallback tests
       - uses: actions/upload-artifact@v4    # keep the coverage report as a downloadable artifact
         with: { name: coverage, path: coverage/, retention-days: 14 }
 ```
@@ -207,7 +209,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: '20', cache: 'npm' }
+        with: { node-version: '22', cache: 'npm' }
       - run: npm ci
       - run: npm run build                        # produce dist/ (the deployable files)
       - uses: SamKirkland/FTP-Deploy-Action@v4.3.5 # upload dist/ over FTP
@@ -289,12 +291,12 @@ test, or low coverage → `ci` red → `docker`/`deploy` skipped.
 
 **The Dockerfile (multi-stage), explained:**
 ```dockerfile
-FROM node:20-alpine AS build      # STAGE 1: a small Node image to build the site
+FROM node:22-alpine AS build      # STAGE 1: a small Node image to build the site
 WORKDIR /app
 COPY package*.json ./             # copy manifests first → better layer caching
 RUN npm ci                        # install deps
 COPY . .                          # copy the rest of the source
-RUN npm run lint && npm test && npm run build   # quality-check INSIDE the image, then build dist/
+RUN npm run lint && npm test && npm run test:unit && npm run typecheck && npm run build   # quality-check INSIDE the image, then build dist/
 
 FROM nginx:alpine AS production   # STAGE 2: a tiny web server image
 COPY --from=build /app/dist /usr/share/nginx/html   # take ONLY the built dist/ from stage 1
@@ -424,7 +426,7 @@ Follow commit `89e729b` from keyboard to live site:
 2. **`git push`** → the commit travels to GitHub; server-side `main` advances to `89e729b`.
 3. **GitHub** sees a `push` to `main`, matches `ci-cd.yml`'s `on:`, and **creates a run**.
 4. **Runner A** boots (Ubuntu VM) for **`ci`**: checkout `89e729b` → `setup-node` → `npm ci` →
-   `npm run lint` → `npm test` (coverage gate) → upload coverage. ✅ (~20s)
+   `npm run lint` → `npm test` (coverage gate) → `npm run typecheck` → `npm run test:unit` → upload coverage. ✅ (~20s)
 5. `ci` passing **unblocks** `docker` and `deploy` (their `needs` is satisfied; it's a
    main-push so their `if` is true). They start **in parallel**.
 6. **Runner B** for **`docker`**: checkout → Buildx → login to Docker Hub → build the

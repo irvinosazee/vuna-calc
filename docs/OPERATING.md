@@ -39,7 +39,8 @@ cd "path/to/vuna-calc-482"
 npm run lint
 npm test
 npm run build          # builds dist/
-python3 -m http.server 8000   # open http://localhost:8000 to eyeball it (Ctrl+C to stop)
+npm run preview        # preview dist/ locally at http://localhost:4173 (Ctrl+C to stop)
+# alternative: python3 -m http.server 8000  (open http://localhost:8000)
 
 # 3. commit and push — THIS deploys
 git add -A
@@ -131,7 +132,7 @@ The next push picks up the new value automatically.
 | `docker` fails on login | Docker Hub token expired/revoked — generate a new token and update `DOCKERHUB_TOKEN`. |
 | `ci` fails on tests/coverage | A test failed or coverage dropped — run `npm test` locally and fix. |
 | Whole run didn't start | You're on a branch, or the push didn't reach `main`. Check `git status` / `git push`. |
-| "Node.js 20 deprecated" warning | Harmless future-dated notice; not a failure. |
+| Node version deprecation warning | Harmless future-dated notice; not a failure. Pipeline uses Node 22. |
 
 ---
 
