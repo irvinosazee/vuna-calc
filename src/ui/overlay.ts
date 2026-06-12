@@ -130,6 +130,8 @@ export function createOverlay(
         // course card and re-announces the chapter.
         tickerKey = '';
         shownChapter = '';
+        // Hide a lingering auto-ticker card (user-pinned cards stay).
+        if (!pinned) card.classList.add('hidden');
       }
 
       beats.forEach((el, i) => {
@@ -160,7 +162,8 @@ export function createOverlay(
       // Chapter panel
       const inClimb = journey && (pos.phase === 'chapter' || pos.phase === 'course');
       chapterPanel.classList.toggle('hidden', !inClimb);
-      chapterPanel.classList.toggle('compact', pos.phase === 'course');
+      // Never combine .compact with .hidden — .compact's opacity would win the cascade.
+      chapterPanel.classList.toggle('compact', inClimb && pos.phase === 'course');
       if (inClimb) {
         const key = `${pos.levelIdx}-${pos.semIdx}`;
         if (key !== shownChapter) {
