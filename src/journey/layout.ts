@@ -41,6 +41,7 @@ export function pseudoRandom(k: number): number {
 }
 
 export function buildLayout(levels: Level[]): TreeLayout {
+  if (levels.length === 0) throw new Error('buildLayout: levels must not be empty');
   const levelY = levels.map((_, i) => LEVEL_BASE_Y + i * LEVEL_GAP);
   const trunkHeight = levelY[levelY.length - 1] + 5;
   const limbs: LimbSpot[] = [];
@@ -59,7 +60,8 @@ export function buildLayout(levels: Level[]): TreeLayout {
       limbs.push({ start, end, levelIdx: li, semIdx: si });
 
       sem.courses.forEach((_, ci) => {
-        const k = li * 100 + si * 50 + ci;
+        // ×3 stride: each leaf owns a non-overlapping (k, k+1, k+2) key triple
+        const k = (li * 100 + si * 50 + ci) * 3;
         const a = angle + (pseudoRandom(k) - 0.5) * 1.8;
         const r = LIMB_LEN + 0.6 + pseudoRandom(k + 1) * 2.4;
         leaves.push({

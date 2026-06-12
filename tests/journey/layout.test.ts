@@ -10,7 +10,7 @@ describe('buildLayout', () => {
   });
 
   it('creates one limb per semester', () => {
-    expect(layout.limbs).toHaveLength(8);
+    expect(layout.limbs).toHaveLength(levels.reduce((s, l) => s + l.semesters.length, 0));
   });
 
   it('stacks level heights ascending, below the trunk top', () => {
@@ -40,6 +40,12 @@ describe('buildLayout', () => {
     const pts = layout.cameraPoints;
     expect(pts[0].y).toBeLessThan(3);
     expect(pts[pts.length - 1].y).toBeGreaterThan(layout.trunkHeight);
+  });
+
+  it('camera path clears the leaf canopy', () => {
+    const maxLeafR = Math.max(...layout.leaves.map((l) => Math.hypot(l.pos.x, l.pos.z)));
+    const minCamR = Math.min(...layout.cameraPoints.map((p) => Math.hypot(p.x, p.z)));
+    expect(minCamR).toBeGreaterThan(maxLeafR);
   });
 });
 
