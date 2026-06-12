@@ -123,7 +123,13 @@ export class JourneyTree {
     for (const limb of this.limbs) limb.mesh.visible = clamped >= limb.reveal;
     // The constructor-computed full bounding sphere stays valid (conservative)
     // as count shrinks/grows, so raycasting keeps working at any growth.
-    this.leafMesh.count = Math.round(clamped * this.leafRefs.length);
+    const nextCount = Math.round(clamped * this.leafRefs.length);
+    // If the spotlighted leaf is scrolling out of the visible window, reset its
+    // matrix so it reappears in canonical state rather than mid-pulse.
+    if (this.spotlight !== null && nextCount <= this.spotlight && this.leafMesh.count > this.spotlight) {
+      this.restoreLeaf(this.spotlight);
+    }
+    this.leafMesh.count = nextCount;
   }
 
   /** Pulse one leaf (the guided ticker's current course); null clears it. */
