@@ -40,6 +40,7 @@ function boot(): void {
   const env = new Environment(
     isMobile ? theme.particles.mobile : theme.particles.desktop,
     tree.layout.trunkHeight,
+    !isMobile,
   );
   scene.add(env.group);
 

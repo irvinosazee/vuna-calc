@@ -5,7 +5,7 @@ export class Environment {
   readonly group = new THREE.Group();
   private readonly fireflies: THREE.Points;
 
-  constructor(particleCount: number, height: number) {
+  constructor(particleCount: number, height: number, lush: boolean) {
     const ground = new THREE.Mesh(
       new THREE.CircleGeometry(60, 32),
       new THREE.MeshStandardMaterial({ color: '#0c3622', roughness: 1 }),
@@ -50,6 +50,31 @@ export class Environment {
       shrub.position.set(Math.cos(a) * r, s * 0.9, Math.sin(a) * r);
       this.group.add(shrub);
     }
+
+    // Ground life — grass tufts and tiny flowers (halved on mobile).
+    const grassCount = lush ? 60 : 30;
+    const grassMat = new THREE.MeshStandardMaterial({ color: '#2e8b57', flatShading: true, roughness: 1 });
+    const grass = new THREE.InstancedMesh(new THREE.ConeGeometry(0.07, 0.26, 4), grassMat, grassCount);
+    const gm = new THREE.Matrix4();
+    for (let i = 0; i < grassCount; i++) {
+      const a = pseudoRandom(i + 700) * Math.PI * 2;
+      const r = 3 + pseudoRandom(i + 701) * 27;
+      const s = 0.7 + pseudoRandom(i + 702) * 0.9;
+      gm.makeScale(s, s, s).setPosition(Math.cos(a) * r, 0.13 * s, Math.sin(a) * r);
+      grass.setMatrixAt(i, gm);
+    }
+    this.group.add(grass);
+
+    const flowerCount = lush ? 20 : 10;
+    const flowerMat = new THREE.MeshStandardMaterial({ color: '#f0e68c', flatShading: true, roughness: 0.7 });
+    const flowers = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(0.08, 0), flowerMat, flowerCount);
+    for (let i = 0; i < flowerCount; i++) {
+      const a = pseudoRandom(i + 800) * Math.PI * 2;
+      const r = 4 + pseudoRandom(i + 801) * 24;
+      gm.makeScale(1, 1, 1).setPosition(Math.cos(a) * r, 0.1, Math.sin(a) * r);
+      flowers.setMatrixAt(i, gm);
+    }
+    this.group.add(flowers);
   }
 
   update(t: number): void {

@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { levels, theme, courseFamily, type Course } from '../data/journey';
-import { buildLayout, pseudoRandom, type TreeLayout } from '../journey/layout';
+import { buildLayout, pseudoRandom, TRUNK_BASE_R, TRUNK_TOP_R, type TreeLayout } from '../journey/layout';
 
 export interface LeafRef {
   course: Course;
@@ -9,6 +9,7 @@ export interface LeafRef {
 }
 
 const UP = new THREE.Vector3(0, 1, 0);
+const FOLIAGE_GREENS = ['#1f7a4a', '#2a9d62'];
 
 function makeLabel(text: string): THREE.Sprite {
   const canvas = document.createElement('canvas');
@@ -40,42 +41,110 @@ function makeLabel(text: string): THREE.Sprite {
   return sprite;
 }
 
+/** Cylinder mesh oriented from start to end (shared by limbs/twigs/trunk segments). */
+function boneMesh(
+  start: THREE.Vector3,
+  end: THREE.Vector3,
+  rBottom: number,
+  rTop: number,
+  mat: THREE.Material,
+  radialSegments = 6,
+): THREE.Mesh {
+  const dir = end.clone().sub(start);
+  const len = dir.length();
+  const mesh = new THREE.Mesh(new THREE.CylinderGeometry(rTop, rBottom, len, radialSegments, 1), mat);
+  mesh.position.copy(start).addScaledVector(dir, 0.5);
+  mesh.quaternion.setFromUnitVectors(UP, dir.normalize());
+  return mesh;
+}
+
 export class JourneyTree {
   readonly group = new THREE.Group();
   readonly layout: TreeLayout;
   readonly leafMesh: THREE.InstancedMesh;
   readonly leafRefs: LeafRef[] = [];
+  private readonly trunkGroup = new THREE.Group();
+  private readonly foliageMesh: THREE.InstancedMesh;
+  private readonly foliageReveals: number[] = [];
+  private readonly limbs: { mesh: THREE.Mesh; reveal: number }[] = [];
   private readonly leafTransforms: { pos: THREE.Vector3; quat: THREE.Quaternion; scale: number }[] = [];
   private spotlight: number | null = null;
   private readonly spotM = new THREE.Matrix4();
   private readonly spotS = new THREE.Vector3();
-  private readonly trunk: THREE.Mesh;
-  private readonly limbs: { mesh: THREE.Mesh; reveal: number }[] = [];
 
   constructor() {
     this.layout = buildLayout(levels);
-    const { trunkHeight, levelY, limbs, leaves } = this.layout;
+    const { trunkHeight, levelY, limbs, leaves, trunkSpine, foliage, twigs } = this.layout;
 
-    const trunkGeo = new THREE.CylinderGeometry(0.5, 1.2, trunkHeight, 9, 6);
-    trunkGeo.translate(0, trunkHeight / 2, 0);
     const barkMat = new THREE.MeshStandardMaterial({ color: theme.trunk, flatShading: true, roughness: 0.9 });
-    this.trunk = new THREE.Mesh(trunkGeo, barkMat);
-    this.group.add(this.trunk);
+
+    // Organic trunk: stacked tapered segments along the S-curved spine.
+    for (let i = 0; i < trunkSpine.length - 1; i++) {
+      const a = new THREE.Vector3(trunkSpine[i].x, trunkSpine[i].y, trunkSpine[i].z);
+      const b = new THREE.Vector3(trunkSpine[i + 1].x, trunkSpine[i + 1].y, trunkSpine[i + 1].z);
+      const f0 = i / (trunkSpine.length - 1);
+      const f1 = (i + 1) / (trunkSpine.length - 1);
+      const r0 = TRUNK_BASE_R + (TRUNK_TOP_R - TRUNK_BASE_R) * f0;
+      const r1 = TRUNK_BASE_R + (TRUNK_TOP_R - TRUNK_BASE_R) * f1;
+      this.trunkGroup.add(boneMesh(a, b, r0 * 1.04, r1, barkMat, 8));
+    }
+
+    // Root flare around the base.
+    for (let i = 0; i < 6; i++) {
+      const a = (i / 6) * Math.PI * 2 + pseudoRandom(400 + i) * 0.5;
+      const start = new THREE.Vector3(Math.cos(a) * 0.5, 0.9, Math.sin(a) * 0.5);
+      const end = new THREE.Vector3(Math.cos(a) * (1.9 + pseudoRandom(410 + i) * 0.8), 0.02, Math.sin(a) * (1.9 + pseudoRandom(410 + i) * 0.8));
+      this.trunkGroup.add(boneMesh(start, end, 0.42, 0.05, barkMat, 5));
+    }
+    this.group.add(this.trunkGroup);
 
     for (const limb of limbs) {
-      const start = new THREE.Vector3(limb.start.x, limb.start.y, limb.start.z);
-      const end = new THREE.Vector3(limb.end.x, limb.end.y, limb.end.z);
-      const dir = end.clone().sub(start);
-      const len = dir.length();
-      const mesh = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.22, len, 6, 1), barkMat);
-      mesh.position.copy(start).addScaledVector(dir, 0.5);
-      mesh.quaternion.setFromUnitVectors(UP, dir.normalize());
+      const mesh = boneMesh(
+        new THREE.Vector3(limb.start.x, limb.start.y, limb.start.z),
+        new THREE.Vector3(limb.end.x, limb.end.y, limb.end.z),
+        0.22,
+        0.1,
+        barkMat,
+      );
       this.group.add(mesh);
       this.limbs.push({ mesh, reveal: limb.start.y / trunkHeight });
     }
 
+    // Twigs share limb visibility behavior.
+    for (const tw of twigs) {
+      const mesh = boneMesh(
+        new THREE.Vector3(tw.start.x, tw.start.y, tw.start.z),
+        new THREE.Vector3(tw.end.x, tw.end.y, tw.end.z),
+        0.07,
+        0.02,
+        barkMat,
+        4,
+      );
+      this.group.add(mesh);
+      this.limbs.push({ mesh, reveal: tw.reveal });
+    }
+
+    // Decorative foliage canopy (NOT raycast — picking targets leafMesh only).
+    const foliageMat = new THREE.MeshStandardMaterial({ color: '#ffffff', flatShading: true, roughness: 0.85 });
+    this.foliageMesh = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1, 0), foliageMat, foliage.length);
+    {
+      const m = new THREE.Matrix4();
+      const color = new THREE.Color();
+      foliage.forEach((spot, i) => {
+        m.makeScale(spot.scale, spot.scale * 0.85, spot.scale).setPosition(spot.pos.x, spot.pos.y, spot.pos.z);
+        this.foliageMesh.setMatrixAt(i, m);
+        color.set(FOLIAGE_GREENS[Math.floor(pseudoRandom(i + 0.5) * FOLIAGE_GREENS.length)]);
+        this.foliageMesh.setColorAt(i, color);
+        this.foliageReveals.push(spot.reveal);
+      });
+    }
+    if (this.foliageMesh.instanceColor) this.foliageMesh.instanceColor.needsUpdate = true;
+    this.foliageMesh.computeBoundingSphere();
+    this.group.add(this.foliageMesh);
+
+    // Course leaves — clickable, slightly larger than before.
     const leafMat = new THREE.MeshStandardMaterial({ color: '#ffffff', flatShading: true, roughness: 0.55 });
-    this.leafMesh = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(0.42, 0), leafMat, leaves.length);
+    this.leafMesh = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(0.5, 0), leafMat, leaves.length);
     const m = new THREE.Matrix4();
     const color = new THREE.Color();
     const pos = new THREE.Vector3();
@@ -87,17 +156,17 @@ export class JourneyTree {
       quat.setFromAxisAngle(UP, pseudoRandom(i * 7 + 3) * Math.PI * 2);
       scl.set(s, s, s);
       m.compose(pos, quat, scl);
-      this.leafTransforms.push({ pos: pos.clone(), quat: quat.clone(), scale: s });
       this.leafMesh.setMatrixAt(i, m);
+      this.leafTransforms.push({ pos: pos.clone(), quat: quat.clone(), scale: s });
       const course = levels[leaf.levelIdx].semesters[leaf.semIdx].courses[leaf.courseIdx];
       this.leafMesh.setColorAt(i, color.set(theme.families[courseFamily(course.code)]));
       this.leafRefs.push({ course, levelIdx: leaf.levelIdx, semIdx: leaf.semIdx });
     });
     if (this.leafMesh.instanceColor) this.leafMesh.instanceColor.needsUpdate = true;
-    this.group.add(this.leafMesh);
     // Compute the bounding sphere now, while count covers all instances —
     // computed lazily later it can be cached empty (count starts at 0), killing raycasts.
     this.leafMesh.computeBoundingSphere();
+    this.group.add(this.leafMesh);
 
     levelY.forEach((y, i) => {
       const ring = new THREE.Mesh(
@@ -116,13 +185,16 @@ export class JourneyTree {
     });
   }
 
-  /** p in [0,1]: trunk scales up, limbs appear, leaves reveal bottom-up. */
+  /** p in [0,1]: trunk scales up, limbs/twigs appear, foliage and leaves reveal bottom-up. */
   setGrowth(p: number): void {
     const clamped = Math.min(1, Math.max(0, p));
-    this.trunk.scale.y = Math.max(0.02, clamped);
+    this.trunkGroup.scale.y = Math.max(0.02, clamped);
     for (const limb of this.limbs) limb.mesh.visible = clamped >= limb.reveal;
-    // The constructor-computed full bounding sphere stays valid (conservative)
-    // as count shrinks/grows, so raycasting keeps working at any growth.
+
+    let foliageCount = 0;
+    while (foliageCount < this.foliageReveals.length && this.foliageReveals[foliageCount] <= clamped) foliageCount++;
+    this.foliageMesh.count = foliageCount;
+
     const nextCount = Math.round(clamped * this.leafRefs.length);
     // If the spotlighted leaf is scrolling out of the visible window, reset its
     // matrix so it reappears in canonical state rather than mid-pulse.
