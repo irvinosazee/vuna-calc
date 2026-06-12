@@ -90,6 +90,9 @@ export class JourneyTree {
     });
     if (this.leafMesh.instanceColor) this.leafMesh.instanceColor.needsUpdate = true;
     this.group.add(this.leafMesh);
+    // Compute the bounding sphere now, while count covers all instances —
+    // computed lazily later it can be cached empty (count starts at 0), killing raycasts.
+    this.leafMesh.computeBoundingSphere();
 
     levelY.forEach((y, i) => {
       const ring = new THREE.Mesh(
@@ -113,6 +116,8 @@ export class JourneyTree {
     const clamped = Math.min(1, Math.max(0, p));
     this.trunk.scale.y = Math.max(0.02, clamped);
     for (const limb of this.limbs) limb.mesh.visible = clamped >= limb.reveal;
+    // The constructor-computed full bounding sphere stays valid (conservative)
+    // as count shrinks/grows, so raycasting keeps working at any growth.
     this.leafMesh.count = Math.round(clamped * this.leafRefs.length);
   }
 

@@ -13,8 +13,8 @@ export class Environment {
     ground.rotation.x = -Math.PI / 2;
     this.group.add(ground);
 
-    this.group.add(new THREE.HemisphereLight('#bdf5d3', '#06281a', 1.1));
-    const sun = new THREE.DirectionalLight('#eafff2', 1.4);
+    this.group.add(new THREE.HemisphereLight('#bdf5d3', '#06281a', 2.2));
+    const sun = new THREE.DirectionalLight('#eafff2', 2.2);
     sun.position.set(8, height + 10, 5);
     this.group.add(sun);
 

@@ -89,7 +89,8 @@ function boot(): void {
     const dt = Math.min(clock.getDelta(), 0.05);
     const t = clock.elapsedTime;
     rig.update(camera, dt);
-    const growth = mode === 'explore' ? 1 : Math.min(1, Math.max(0, (scrollRig.progress - 0.04) / 0.86));
+    // Growth leads the camera (denominator < 1 progress span) so the climb is always through foliage.
+    const growth = mode === 'explore' ? 1 : Math.min(1, Math.max(0, (scrollRig.progress - 0.04) / 0.7));
     tree.setGrowth(growth);
     tree.update(t);
     env.update(t);
