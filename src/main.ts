@@ -1,6 +1,7 @@
 import './ui/journey.css';
 import * as THREE from 'three';
-import { theme } from './data/journey';
+import { theme, levels } from './data/journey';
+import { chapterAt, leafIndexOf } from './journey/chapters';
 import { JourneyTree } from './scene/tree';
 import { Environment } from './scene/environment';
 import { ScrollRig } from './rigs/ScrollRig';
@@ -50,15 +51,15 @@ function boot(): void {
   rig.enter(camera);
 
   function setMode(next: Mode): void {
-    if (next === mode || next === 'walk') return;
+    if (next === mode || next === 'walk') return; // walk arrives in the next task
     rig.dispose();
     mode = next;
     rig = next === 'explore' ? orbitRig : scrollRig;
     rig.enter(camera);
-    document.body.classList.toggle('mode-explore', next === 'explore');
+    document.body.classList.toggle('mode-explore', next !== 'journey');
   }
 
-  const ui = createOverlay(overlayRoot, setMode);
+  const ui = createOverlay(overlayRoot, setMode, isMobile);
 
   const raycaster = new THREE.Raycaster();
   const pointer = new THREE.Vector2();
@@ -89,12 +90,19 @@ function boot(): void {
     const dt = Math.min(clock.getDelta(), 0.05);
     const t = clock.elapsedTime;
     rig.update(camera, dt);
-    // Growth leads the camera (denominator < 1 progress span) so the climb is always through foliage.
-    const growth = mode === 'explore' ? 1 : Math.min(1, Math.max(0, (scrollRig.progress - 0.04) / 0.7));
+
+    const pos = chapterAt(scrollRig.progress, levels);
+    const growth =
+      mode !== 'journey' ? 1 : Math.min(1, Math.max(0, (scrollRig.progress - 0.04) / 0.7));
     tree.setGrowth(growth);
+    tree.setSpotlight(
+      mode === 'journey' && pos.phase === 'course'
+        ? leafIndexOf(levels, pos.levelIdx, pos.semIdx, pos.courseIdx)
+        : null,
+    );
     tree.update(t);
     env.update(t);
-    ui.update(scrollRig.progress, mode);
+    ui.update(scrollRig.progress, mode, pos);
     renderer.render(scene, camera);
   });
 }

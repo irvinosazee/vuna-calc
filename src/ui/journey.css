@@ -321,3 +321,104 @@ body.no-webgl #spacer {
 .scroll-hint.hidden {
   opacity: 0;
 }
+
+/* ── Guided chapters ───────────────────────────────────────────── */
+
+.chapter-panel {
+  position: fixed;
+  top: 18%;
+  left: 1.4rem;
+  max-width: 300px;
+  padding: 1.1rem 1.3rem;
+  background: rgba(6, 40, 24, 0.7);
+  border: 1px solid rgba(150, 255, 190, 0.25);
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+  transition: opacity 0.4s, transform 0.4s;
+  z-index: 5;
+}
+
+.chapter-panel.hidden {
+  opacity: 0;
+  transform: translateX(-12px);
+  pointer-events: none;
+}
+
+.chapter-panel .chapter-level {
+  font-weight: 800;
+  font-size: 1.5rem;
+  text-shadow: 0 0 18px rgba(52, 211, 153, 0.5);
+}
+
+.chapter-panel .chapter-sem {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  color: #a8e6c5;
+  margin-top: 0.2rem;
+}
+
+.chapter-panel .chapter-meta {
+  font-size: 0.85rem;
+  color: #d8ffe9;
+  margin-top: 0.4rem;
+}
+
+.chapter-panel.compact {
+  transform: scale(0.82);
+  transform-origin: top left;
+  opacity: 0.85;
+}
+
+/* ── Legend ────────────────────────────────────────────────────── */
+
+.legend {
+  display: flex;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+  font-size: 0.72rem;
+  color: #a8e6c5;
+}
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.legend-item i {
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+/* ── Leaf hint ─────────────────────────────────────────────────── */
+
+.leaf-hint {
+  position: fixed;
+  top: 5.2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.5rem 1.1rem;
+  background: rgba(6, 40, 24, 0.75);
+  border: 1px solid rgba(150, 255, 190, 0.3);
+  border-radius: 999px;
+  font-size: 0.85rem;
+  backdrop-filter: blur(8px);
+  transition: opacity 0.8s;
+  z-index: 6;
+}
+
+.leaf-hint.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ── Card about line ───────────────────────────────────────────── */
+
+.card-about {
+  margin: 0 0 0.6rem;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: #c4f0d8;
+}
