@@ -1,0 +1,61 @@
+/* ============================================================
+   Journey skin — re-themes the calculator to match the Veritas
+   Journey site. Loaded LAST so it only overrides variables and
+   a few accents. Light mode = mint grove, dark mode = deep forest.
+   Functionality and layout are untouched.
+   ============================================================ */
+
+:root {
+  --neu-bg: #cfe8d8;
+  --neu-text: #1d4434;
+  --neu-muted: #56806a;
+  --neu-accent: #1f9861;
+  --neu-accent-strong: #157a4c;
+  --neu-danger: #d97a55;
+  --neu-shadow-dark: #a7c6b4;
+  --neu-shadow-light: #f2fff8;
+}
+
+body.dark-mode {
+  --neu-bg: #103626;
+  --neu-text: #d8ffe9;
+  --neu-muted: #8fc4a8;
+  --neu-accent: #34d399;
+  --neu-accent-strong: #2bbd88;
+  --neu-danger: #ff8f7a;
+  --neu-shadow-dark: #082417;
+  --neu-shadow-light: #1c4f38;
+}
+
+/* Sky gradient behind the neumorphic surface (subtle, same hue family
+   so the soft shadows still read correctly). */
+body {
+  background: linear-gradient(160deg, #b9dcc8 0%, #cfe8d8 45%, #dbf2e4 100%) !important;
+  font-family: 'Sora', 'Inter', 'Segoe UI', sans-serif !important;
+}
+
+body.dark-mode {
+  background: linear-gradient(160deg, #0b2a1c 0%, #103626 45%, #15452f 100%) !important;
+}
+
+/* Monospace display, like the journey's course codes */
+#result {
+  font-family: 'JetBrains Mono', monospace !important;
+}
+
+/* The back-to-journey link + theme toggle styled like journey mode buttons */
+a[title='Back to the 3D journey'],
+.theme-toggle-btn {
+  font-family: 'Sora', sans-serif !important;
+  font-weight: 600;
+  color: var(--neu-text) !important;
+  background: var(--neu-bg) !important;
+  border: 1px solid var(--neu-accent) !important;
+  border-radius: 999px !important;
+}
+
+a[title='Back to the 3D journey']:hover,
+.theme-toggle-btn:hover {
+  background: var(--neu-accent) !important;
+  color: #06281a !important;
+}
