@@ -55,4 +55,11 @@ describe('journey data integrity', () => {
     expect(introBeats).toHaveLength(3);
     expect(introBeats[1].text).toContain(student.matric);
   });
+
+  it('every course has a short about line', () => {
+    for (const c of allCourses) {
+      expect(c.about.length, `${c.code} about`).toBeGreaterThan(10);
+      expect(c.about.length, `${c.code} about`).toBeLessThan(160);
+    }
+  });
 });
