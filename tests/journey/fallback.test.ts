@@ -21,4 +21,9 @@ describe('buildFallbackHTML', () => {
   it('links to the calculator', () => {
     expect(html).toContain('href="./calculator/"');
   });
+
+  it('escapes ampersands in course titles', () => {
+    expect(html).toContain('Software Testing &amp; Quality Assurance');
+    expect(html).not.toContain('Software Testing & Quality Assurance');
+  });
 });
