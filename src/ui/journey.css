@@ -28,3 +28,48 @@ canvas.webgl {
 body.mode-explore {
   overflow: hidden;
 }
+
+body.no-webgl #spacer {
+  display: none;
+}
+
+.fallback {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem;
+}
+
+.fallback h1 {
+  font-size: 2.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.fallback h2 {
+  margin-top: 2rem;
+  color: #a3e635;
+}
+
+.fallback h3 {
+  margin: 1rem 0 0.4rem;
+  font-weight: 600;
+}
+
+.fallback ul {
+  list-style: none;
+  padding: 0;
+}
+
+.fallback li {
+  padding: 0.3rem 0;
+  border-bottom: 1px solid rgba(150, 255, 190, 0.12);
+}
+
+.fallback code {
+  font-family: 'JetBrains Mono', monospace;
+  color: #34d399;
+  margin-right: 0.5rem;
+}
+
+.fallback a {
+  color: #a3e635;
+}
