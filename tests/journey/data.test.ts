@@ -58,8 +58,11 @@ describe('journey data integrity', () => {
 
   it('every course has a short about line', () => {
     for (const c of allCourses) {
+      expect(c.about.trim(), `${c.code} about is blank`).toBeTruthy();
+      expect(c.about, `${c.code} about has stray whitespace`).toBe(c.about.trim());
       expect(c.about.length, `${c.code} about`).toBeGreaterThan(10);
-      expect(c.about.length, `${c.code} about`).toBeLessThan(160);
+      // Ticker display wraps above ~120 chars; keep descriptions concise.
+      expect(c.about.length, `${c.code} about`).toBeLessThan(120);
     }
   });
 });
