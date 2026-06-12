@@ -73,3 +73,251 @@ body.no-webgl #spacer {
 .fallback a {
   color: #a3e635;
 }
+
+/* ── Overlay ───────────────────────────────────────────────────── */
+
+/* The overlay never blocks scrolling/dragging on the canvas; individual
+   interactive elements re-enable pointer-events below. */
+#overlay {
+  pointer-events: none;
+}
+
+.modes,
+.course-card,
+.finale-actions {
+  pointer-events: auto;
+}
+
+.hud-top {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.4rem;
+  z-index: 5;
+}
+
+.brand {
+  font-weight: 800;
+  font-size: 1.05rem;
+  letter-spacing: 0.02em;
+  text-shadow: 0 0 18px rgba(52, 211, 153, 0.6);
+}
+
+.modes {
+  display: flex;
+  gap: 0.5rem;
+  pointer-events: auto;
+}
+
+.mode-btn {
+  font: 600 0.85rem 'Sora', sans-serif;
+  color: #d8ffe9;
+  background: rgba(6, 40, 24, 0.55);
+  border: 1px solid rgba(150, 255, 190, 0.22);
+  border-radius: 999px;
+  padding: 0.45rem 1rem;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  text-decoration: none;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.mode-btn:hover:not(:disabled) {
+  border-color: rgba(150, 255, 190, 0.6);
+}
+
+.mode-btn.active {
+  background: rgba(52, 211, 153, 0.25);
+  border-color: #34d399;
+}
+
+.mode-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.calc-link {
+  border-color: rgba(240, 230, 140, 0.4);
+}
+
+/* ── Intro beats ───────────────────────────────────────────────── */
+
+.beat {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.6s, transform 0.6s;
+  padding: 0 1.5rem;
+}
+
+.beat.visible {
+  opacity: 1;
+  transform: none;
+}
+
+.beat h2 {
+  font-size: clamp(2rem, 6vw, 3.6rem);
+  font-weight: 800;
+  text-shadow: 0 0 30px rgba(52, 211, 153, 0.5);
+}
+
+.beat p {
+  margin-top: 0.8rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: clamp(0.85rem, 2.2vw, 1.05rem);
+  color: #a8e6c5;
+}
+
+/* ── Bottom HUD ────────────────────────────────────────────────── */
+
+.hud-bottom {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 1rem 1.4rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  z-index: 5;
+}
+
+.level-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  color: #a8e6c5;
+}
+
+.progress-track {
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(150, 255, 190, 0.15);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #34d399, #a3e635);
+  transform-origin: left;
+  transform: scaleX(0);
+}
+
+.scroll-hint {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #a8e6c5;
+  animation: bob 1.8s ease-in-out infinite;
+}
+
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(6px); }
+}
+
+/* ── Course card ───────────────────────────────────────────────── */
+
+.course-card {
+  position: fixed;
+  top: 50%;
+  right: 1.4rem;
+  transform: translateY(-50%);
+  width: min(320px, calc(100vw - 2.8rem));
+  background: rgba(6, 40, 24, 0.75);
+  border: 1px solid rgba(150, 255, 190, 0.25);
+  border-radius: 18px;
+  padding: 1.3rem 1.4rem;
+  backdrop-filter: blur(12px);
+  pointer-events: auto;
+  z-index: 6;
+  transition: opacity 0.25s, transform 0.25s;
+}
+
+.course-card.hidden {
+  opacity: 0;
+  transform: translateY(-50%) translateX(16px);
+  pointer-events: none;
+}
+
+.card-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.7rem;
+  background: none;
+  border: none;
+  color: #a8e6c5;
+  font-size: 1.3rem;
+  cursor: pointer;
+}
+
+.card-code {
+  font-family: 'JetBrains Mono', monospace;
+  color: #34d399;
+  font-size: 0.85rem;
+}
+
+.card-title {
+  margin: 0.3rem 0 0.6rem;
+  font-size: 1.15rem;
+}
+
+.card-meta {
+  font-size: 0.8rem;
+  color: #a8e6c5;
+}
+
+/* ── Finale ────────────────────────────────────────────────────── */
+
+.finale {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  gap: 0.6rem;
+  padding: 0 1.5rem;
+  transition: opacity 0.6s;
+}
+
+.finale.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.finale h2 {
+  font-size: clamp(2rem, 6vw, 3.2rem);
+  font-weight: 800;
+  text-shadow: 0 0 30px rgba(52, 211, 153, 0.5);
+}
+
+.finale-name {
+  font-family: 'JetBrains Mono', monospace;
+  color: #a8e6c5;
+}
+
+.finale-stats {
+  font-size: 1.05rem;
+  color: #d8ffe9;
+}
+
+.finale-actions {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.7rem;
+  justify-content: center;
+}
+
+.scroll-hint {
+  transition: opacity 0.4s;
+}
+
+.scroll-hint.hidden {
+  opacity: 0;
+}

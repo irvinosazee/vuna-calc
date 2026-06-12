@@ -6,10 +6,12 @@ import { Environment } from './scene/environment';
 import { ScrollRig } from './rigs/ScrollRig';
 import { OrbitRig } from './rigs/OrbitRig';
 import type { CameraRig, Mode } from './rigs/types';
+import { createOverlay } from './ui/overlay';
 import { renderFallback } from './ui/fallback';
 import { webglAvailable } from './ui/webgl';
 
 const app = document.getElementById('app')!;
+const overlayRoot = document.getElementById('overlay')!;
 
 if (!webglAvailable()) {
   renderFallback(app);
@@ -47,7 +49,6 @@ function boot(): void {
   camera.position.set(p0.x, p0.y, p0.z);
   rig.enter(camera);
 
-  // Exposed for the overlay (Task 8 wires real buttons to this).
   function setMode(next: Mode): void {
     if (next === mode || next === 'walk') return;
     rig.dispose();
@@ -56,8 +57,26 @@ function boot(): void {
     rig.enter(camera);
     document.body.classList.toggle('mode-explore', next === 'explore');
   }
-  // Referenced via `void` so TS keeps it; Task 8's overlay wires real buttons to setMode.
-  void setMode;
+
+  const ui = createOverlay(overlayRoot, setMode);
+
+  const raycaster = new THREE.Raycaster();
+  const pointer = new THREE.Vector2();
+  let downAt = { x: 0, y: 0 };
+  renderer.domElement.addEventListener('pointerdown', (e) => {
+    downAt = { x: e.clientX, y: e.clientY };
+  });
+  renderer.domElement.addEventListener('pointerup', (e) => {
+    if (Math.hypot(e.clientX - downAt.x, e.clientY - downAt.y) > 6) return;
+    pointer.set((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
+    raycaster.setFromCamera(pointer, camera);
+    const hit = raycaster.intersectObject(tree.leafMesh)[0];
+    if (hit?.instanceId !== undefined) {
+      ui.showCourse(tree.leafRefs[hit.instanceId]);
+    } else {
+      ui.hideCourse();
+    }
+  });
 
   window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -74,6 +93,7 @@ function boot(): void {
     tree.setGrowth(growth);
     tree.update(t);
     env.update(t);
+    ui.update(scrollRig.progress, mode);
     renderer.render(scene, camera);
   });
 }
