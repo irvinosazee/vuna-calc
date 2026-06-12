@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { chapterAt, leafIndexOf, CLIMB_START, CLIMB_END } from '../../src/journey/chapters';
+import { chapterAt, leafIndexOf, CLIMB_START, CLIMB_END, CHAPTER_WINDOW } from '../../src/journey/chapters';
 import { levels, allCourses } from '../../src/data/journey';
 
 describe('chapterAt', () => {
@@ -35,7 +35,7 @@ describe('chapterAt', () => {
 
   it('reaches the first and last course of a zone', () => {
     const zoneSize = (CLIMB_END - CLIMB_START) / 8;
-    const startOfCourses = CLIMB_START + zoneSize * 0.15 + 0.0005;
+    const startOfCourses = CLIMB_START + zoneSize * CHAPTER_WINDOW + 0.0005;
     expect(chapterAt(startOfCourses, levels)).toMatchObject({ phase: 'course', levelIdx: 0, semIdx: 0, courseIdx: 0 });
     const endOfZone = CLIMB_START + zoneSize - 0.0005;
     expect(chapterAt(endOfZone, levels)).toMatchObject({ phase: 'course', levelIdx: 0, semIdx: 0, courseIdx: 11 });
@@ -47,5 +47,11 @@ describe('leafIndexOf', () => {
     expect(leafIndexOf(levels, 0, 0, 0)).toBe(0);
     expect(leafIndexOf(levels, 0, 1, 0)).toBe(12);
     expect(leafIndexOf(levels, 3, 1, 6)).toBe(78);
+  });
+
+  it('returns -1 for out-of-range inputs', () => {
+    expect(leafIndexOf(levels, 0, 0, -1)).toBe(-1);
+    expect(leafIndexOf(levels, 0, 0, 99)).toBe(-1);
+    expect(leafIndexOf(levels, 9, 0, 0)).toBe(-1);
   });
 });

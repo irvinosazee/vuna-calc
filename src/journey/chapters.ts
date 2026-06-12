@@ -15,7 +15,7 @@ export interface ChapterPosition {
 
 export const CLIMB_START = 0.18;
 export const CLIMB_END = 0.93;
-const CHAPTER_WINDOW = 0.15; // first 15% of each zone announces the semester
+export const CHAPTER_WINDOW = 0.15; // first 15% of each zone announces the semester
 
 const OUTSIDE = { levelIdx: -1, semIdx: -1, courseIdx: -1 } as const;
 
@@ -26,7 +26,8 @@ export function chapterAt(progress: number, levels: Level[]): ChapterPosition {
   const zones = levels.length * 2;
   const zoneSize = (CLIMB_END - CLIMB_START) / zones;
   const offset = progress - CLIMB_START;
-  const zone = Math.min(zones - 1, Math.floor(offset / zoneSize));
+  // +1e-9 absorbs float64 carry loss at exact zone boundaries (0.18 isn't dyadic).
+  const zone = Math.min(zones - 1, Math.floor(offset / zoneSize + 1e-9));
   const levelIdx = Math.floor(zone / 2);
   const semIdx = zone % 2;
   const within = (offset - zone * zoneSize) / zoneSize;
@@ -51,7 +52,10 @@ export function leafIndexOf(
   let i = 0;
   for (let li = 0; li < levels.length; li++) {
     for (let si = 0; si < levels[li].semesters.length; si++) {
-      if (li === levelIdx && si === semIdx) return i + courseIdx;
+      if (li === levelIdx && si === semIdx) {
+        const count = levels[li].semesters[si].courses.length;
+        return courseIdx >= 0 && courseIdx < count ? i + courseIdx : -1;
+      }
       i += levels[li].semesters[si].courses.length;
     }
   }
