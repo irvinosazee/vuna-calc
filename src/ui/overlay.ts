@@ -15,8 +15,8 @@ export interface OverlayHandles {
 
 export function levelLabel(progress: number): string {
   if (progress < 0.06) return 'Prologue';
-  if (progress > 0.92) return 'The Canopy';
-  const idx = Math.min(3, Math.floor((progress - 0.06) / ((0.92 - 0.06) / 4)));
+  if (progress >= 0.93) return 'The Canopy';
+  const idx = Math.min(3, Math.floor((progress - 0.06) / ((0.93 - 0.06) / 4)));
   return `${(idx + 1) * 100} Level`;
 }
 

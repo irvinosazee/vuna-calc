@@ -84,7 +84,7 @@ body.no-webgl #spacer {
 
 .modes,
 .course-card,
-.finale-actions {
+.finale:not(.hidden) .finale-actions {
   pointer-events: auto;
 }
 
