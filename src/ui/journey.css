@@ -1,0 +1,29 @@
+* {
+  margin: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Sora', system-ui, sans-serif;
+  color: #d8ffe9;
+  background: linear-gradient(to top, #061f13 0%, #0a2e1d 40%, #16573a 78%, #2c8a5b 100%);
+  background-attachment: fixed;
+}
+
+#spacer {
+  height: 760vh;
+}
+
+canvas.webgl {
+  position: fixed;
+  inset: 0;
+  display: block;
+}
+
+body.mode-explore {
+  overflow: hidden;
+}

@@ -1,0 +1,204 @@
+
+Home
+UYI OSAZEE IRVIN OGBEMUDIA
+User Image
+Veritas LogoVeritas E-Campus
+ Dashboard
+ Academics
+ Finance
+ Accomodation
+ InquiriesNew
+ Logout
+Student Course Registration
+Dashboard
+check-result
+Course Registration Form
+Name	IRVIN OGBEMUDIA UYI OSAZEE	Matric No	VUG/SEN/22/8386
+Faculty	Natural and Applied Sciences	Gender	Male
+Programme	Software Engineering	Department	Software Engineering
+ACADEMIC SESSION: 2022/2023	LEVEL: 100	SEMESTER: First Semester
+#	Course Code	Course Title	Credit Unit	Remark
+1	PHY107	General Practical Physics I	1	
+2	PHY101	General Physics I	2	
+3	MTH101	Elementary Mathematics I	2	
+4	GST171	Ethics	0	
+5	GST121	Use of Library, Study Skills and ICT	2	
+6	GST115	History and Philosophy Of Science	2	
+7	GST113	Nigerian People and Culture	2	
+8	GST111	Communication in English I	2	
+9	SEN181	Software Engineering Lab I	2	
+10	SEN105	Introduction to Software Engineering	3	
+11	SEN103	Interaction Design and Usability Engineering	3	
+12	SEN101	Introduction to Computing and Applications	3	
+TOTAL	24	
+ACADEMIC SESSION: 2022/2023	LEVEL: 100	SEMESTER: Second Semester
+#	Course Code	Course Title	Credit Unit	Remark
+1	SEN190	Practicum	1	
+2	SEN182	Software Engineering Lab II	2	
+3	SEN108	Logic and its Application in Computer Science	2	
+4	SEN106	User Experience Design and Evaluation	2	
+5	SEN104	Introduction to Web Technologies	2	
+6	SEN102	Principles of Programming I	2	
+7	GST142	Community Service	1	
+8	GST124	Communication in French	2	
+9	PHY108	General Practical Physics II	1	
+10	PHY102	General Physics II	2	
+11	MTH102	General Mathematics II	3	
+12	GST122	Logic, Philosophy, and Human Existence	2	
+13	GST112	Communication in English II	2	
+TOTAL	24	
+SIGNATURE	DATE
+STUDENT:	......................................................................	.......................................................
+LEVEL ADVISER:	......................................................................	.......................................................
+HOD:	......................................................................	.......................................................
+DEAN:	......................................................................	.......................................................
+Copyright © Veritas University Abuja 2026 .
+
+
+Home
+UYI OSAZEE IRVIN OGBEMUDIA
+User Image
+Veritas LogoVeritas E-Campus
+ Dashboard
+ Academics
+ Finance
+ Accomodation
+ InquiriesNew
+ Logout
+Student Course Registration
+Dashboard
+check-result
+Course Registration Form
+Name	IRVIN OGBEMUDIA UYI OSAZEE	Matric No	VUG/SEN/22/8386
+Faculty	Natural and Applied Sciences	Gender	Male
+Programme	Software Engineering	Department	Software Engineering
+ACADEMIC SESSION: 2023/2024	LEVEL: 200	SEMESTER: First Semester
+#	Course Code	Course Title	Credit Unit	Remark
+1	MTH203	Linear Algebra I	2	
+2	GST223	Introduction to Entrepreneurship	2	
+3	GST221	Peace Studies and Conflict Resolution	2	
+4	GST211	Basic Spiritual Theology	0	
+5	SEN281	Software Engineering Lab III	2	
+6	SEN209	Information Architecture	2	
+7	SEN207	Data Structures and Algorithms	3	
+8	SEN205	Computer Architecture Organisation	3	
+9	SEN203	Software Requirements and Design	2	
+10	SEN201	Discrete Structures	3	
+TOTAL	21	
+ACADEMIC SESSION: 2023/2024	LEVEL: 200	SEMESTER: Second Semester
+#	Course Code	Course Title	Credit Unit	Remark
+1	SEN214	Microcontroller Programming	2	
+2	GST272	Social Teachings of the Church	0	
+3	SEN290	SIWES I	3	
+4	SEN282	Software Engineering Lab IV	2	
+5	SEN212	Information Visualization	2	
+6	SEN210	Software Engineering Process	2	
+7	SEN208	Principles of Operating Systems	2	
+8	SEN206	Design and Analysis of Computer Algorithms	2	
+9	SEN204	Software Construction	2	
+10	SEN202	Principles of programming II	3	
+TOTAL	20	
+SIGNATURE	DATE
+STUDENT:	......................................................................	.......................................................
+LEVEL ADVISER:	......................................................................	.......................................................
+HOD:	......................................................................	.......................................................
+DEAN:	......................................................................	.......................................................
+Copyright © Veritas University Abuja 2026 .
+
+
+
+Home
+UYI OSAZEE IRVIN OGBEMUDIA
+User Image
+Veritas LogoVeritas E-Campus
+ Dashboard
+ Academics
+ Finance
+ Accomodation
+ InquiriesNew
+ Logout
+Student Course Registration
+Dashboard
+check-result
+Course Registration Form
+Name	IRVIN OGBEMUDIA UYI OSAZEE	Matric No	VUG/SEN/22/8386
+Faculty	Natural and Applied Sciences	Gender	Male
+Programme	Software Engineering	Department	Software Engineering
+ACADEMIC SESSION: 2024/2025	LEVEL: 300	SEMESTER: First Semester
+#	Course Code	Course Title	Credit Unit	Remark
+1	STA343	Operation Research I	3	
+2	SEN381	Software Engineering Lab V	2	
+3	SEN309	Concept of Programming Language	2	
+4	SEN307	Database Systems	3	
+5	SEN305	Web Application Development	3	
+6	SEN303	Programmable Logic Controller Programming	2	
+7	SEN301	Object-Oriented Analysis and Design	3	
+8	GST311	Introduction to Entrepreneurship Studies	2	
+TOTAL	20	
+ACADEMIC SESSION: 2024/2025	LEVEL: 300	SEMESTER: Second Semester
+#	Course Code	Course Title	Credit Unit	Remark
+1	SEN390	SIWES II	3	
+2	SEN382	Software Engineering Lab VI	2	
+3	SEN316	Software Testing & Quality Assurance	2	
+4	SEN314	Engineering Mobile Applications	2	
+5	SEN312	Artificial Intelligence & Expert System	3	
+6	SEN310	Software Engineering Security	2	
+7	SEN308	Software Engineering Professional Practice	2	
+8	SEN306	Research Methodology	1	
+9	SEN304	Software Engineering Project Management	2	
+10	SEN302	Software Configuration Management & Maintenance	2	
+TOTAL	21	
+SIGNATURE	DATE
+STUDENT:		2024-11-07
+LEVEL ADVISER:		2024-11-08
+HOD:		2024-11-08
+DEAN:		2024-11-14
+Copyright © Veritas University Abuja 2026 .
+
+
+
+Home
+UYI OSAZEE IRVIN OGBEMUDIA
+User Image
+Veritas LogoVeritas E-Campus
+ Dashboard
+ Academics
+ Finance
+ Accomodation
+ InquiriesNew
+ Logout
+Student Course Registration
+Dashboard
+check-result
+Course Registration Form
+Name	IRVIN OGBEMUDIA UYI OSAZEE	Matric No	VUG/SEN/22/8386
+Faculty	Natural and Applied Sciences	Gender	Male
+Programme	Software Engineering	Department	Software Engineering
+ACADEMIC SESSION: 2025/2026	LEVEL: 400	SEMESTER: First Semester
+#	Course Code	Course Title	Credit Unit	Remark
+1	SEN481	Software Engineering Lab VII	2	
+2	SEN415	Visual Design	2	
+3	SEN413	Research Seminar	1	
+4	SEN411	Special Topics in Software Engineering	2	
+5	SEN409	Software Architecture and Design	2	
+6	SEN407	Distributed, Parallel, and Cloud Computing	2	
+7	SEN405	Open-Source Software Development and Applications	2	
+8	SEN403	Human-computer Interaction	2	
+9	SEN401	Software Engineering Economics	2	
+TOTAL	17	
+ACADEMIC SESSION: 2025/2026	LEVEL: 400	SEMESTER: Second Semester
+#	Course Code	Course Title	Credit Unit	Remark
+1	SEN490	Project	6	
+2	SEN482	Software Engineering Lab VIII	2	
+3	SEN410	Modelling and Computer simulation	2	
+4	SEN408	Game Design and Development	2	
+5	SEN406	Fault—Tolerant Computing	2	
+6	SEN404	Virtual and Augmented Reality	2	
+7	SEN402	Enterprise Application Development	2	
+TOTAL	18	
+SIGNATURE	DATE
+STUDENT:		2026-01-20
+LEVEL ADVISER:		2026-01-21
+HOD:		2026-01-21
+DEAN:		2026-02-06
+Copyright © Veritas University Abuja 2026 .
