@@ -8,6 +8,7 @@
     "prebuild": "node scripts/sync-calculator.mjs",
     "build": "vite build",
     "preview": "vite preview",
+    "prepreview": "node scripts/sync-calculator.mjs",
     "test": "jest --coverage",
     "test:unit": "vitest run",
     "typecheck": "tsc --noEmit",

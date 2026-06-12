@@ -14,6 +14,7 @@ body {
   background-attachment: fixed;
 }
 
+/* Scroll runway for the 3D journey — the camera path maps onto this height. */
 #spacer {
   height: 760vh;
 }
