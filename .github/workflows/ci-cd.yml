@@ -33,6 +33,12 @@ jobs:
       - name: Test with coverage
         run: npm test
 
+      - name: Typecheck (TypeScript)
+        run: npm run typecheck
+
+      - name: Unit tests (Vitest)
+        run: npm run test:unit
+
       - name: Upload coverage
         if: always()
         uses: actions/upload-artifact@v4

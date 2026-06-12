@@ -4,7 +4,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . .
-RUN npm run lint && npm test && npm run build
+RUN npm run lint && npm test && npm run test:unit && npm run typecheck && npm run build
 
 # Stage 2: serve the built site with nginx
 FROM nginx:alpine AS production
