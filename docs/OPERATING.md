@@ -136,6 +136,17 @@ The next push picks up the new value automatically.
 
 ---
 
+## One-time cleanup after the Veritas Journey merge
+
+The FTP deploy action only uploads new/changed files — it never deletes remote
+files. The first deploy after the journey merge leaves the OLD site's root-level
+`assets/` and `src/` directories orphaned on cPanel (the new site doesn't use
+them; the calculator now lives under `/calculator/`). They are harmless cruft,
+but to tidy up: delete `public_html/assets/` and `public_html/src/` once via
+cPanel File Manager after the first successful deploy.
+
+---
+
 ## Quick reference
 
 ```bash
