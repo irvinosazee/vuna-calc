@@ -91,6 +91,8 @@ function boot(): void {
     const t = clock.elapsedTime;
     rig.update(camera, dt);
 
+    // Always derived from scroll progress (not the active rig) so the guided
+    // position is preserved when the user dips into explore/walk and back.
     const pos = chapterAt(scrollRig.progress, levels);
     const growth =
       mode !== 'journey' ? 1 : Math.min(1, Math.max(0, (scrollRig.progress - 0.04) / 0.7));

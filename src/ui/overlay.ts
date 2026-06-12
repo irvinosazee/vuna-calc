@@ -125,6 +125,13 @@ export function createOverlay(
     update(progress: number, mode: Mode, pos: ChapterPosition): void {
       const journey = mode === 'journey';
 
+      if (!journey) {
+        // Reset ticker state so re-entering journey re-renders the current
+        // course card and re-announces the chapter.
+        tickerKey = '';
+        shownChapter = '';
+      }
+
       beats.forEach((el, i) => {
         const start = i * 0.06;
         el.classList.toggle('visible', journey && progress >= start && progress < start + 0.06);

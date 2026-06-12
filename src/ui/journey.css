@@ -328,7 +328,7 @@ body.no-webgl #spacer {
   position: fixed;
   top: 18%;
   left: 1.4rem;
-  max-width: 300px;
+  max-width: min(300px, 40vw);
   padding: 1.1rem 1.3rem;
   background: rgba(6, 40, 24, 0.7);
   border: 1px solid rgba(150, 255, 190, 0.25);
