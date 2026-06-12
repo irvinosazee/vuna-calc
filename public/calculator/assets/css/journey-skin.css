@@ -53,7 +53,7 @@ body.dark-mode {
 }
 
 /* Sculpted keys: raised at rest, pressed-in on tap */
-.btn-grid .btn {
+.calculator .btn {
   border-radius: 16px !important;
   box-shadow:
     7px 7px 14px var(--neu-shadow-dark),
@@ -61,7 +61,7 @@ body.dark-mode {
   transition: box-shadow 0.12s ease, transform 0.12s ease !important;
 }
 
-.btn-grid .btn:active {
+.calculator .btn:active {
   box-shadow:
     inset 5px 5px 10px var(--neu-shadow-dark),
     inset -5px -5px 10px var(--neu-shadow-light) !important;
