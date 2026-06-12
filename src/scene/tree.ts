@@ -45,6 +45,10 @@ export class JourneyTree {
   readonly layout: TreeLayout;
   readonly leafMesh: THREE.InstancedMesh;
   readonly leafRefs: LeafRef[] = [];
+  private readonly leafTransforms: { pos: THREE.Vector3; quat: THREE.Quaternion; scale: number }[] = [];
+  private spotlight: number | null = null;
+  private readonly spotM = new THREE.Matrix4();
+  private readonly spotS = new THREE.Vector3();
   private readonly trunk: THREE.Mesh;
   private readonly limbs: { mesh: THREE.Mesh; reveal: number }[] = [];
 
@@ -83,6 +87,7 @@ export class JourneyTree {
       quat.setFromAxisAngle(UP, pseudoRandom(i * 7 + 3) * Math.PI * 2);
       scl.set(s, s, s);
       m.compose(pos, quat, scl);
+      this.leafTransforms.push({ pos: pos.clone(), quat: quat.clone(), scale: s });
       this.leafMesh.setMatrixAt(i, m);
       const course = levels[leaf.levelIdx].semesters[leaf.semIdx].courses[leaf.courseIdx];
       this.leafMesh.setColorAt(i, color.set(theme.families[courseFamily(course.code)]));
@@ -121,8 +126,31 @@ export class JourneyTree {
     this.leafMesh.count = Math.round(clamped * this.leafRefs.length);
   }
 
+  /** Pulse one leaf (the guided ticker's current course); null clears it. */
+  setSpotlight(index: number | null): void {
+    if (index === this.spotlight) return;
+    if (this.spotlight !== null) this.restoreLeaf(this.spotlight);
+    this.spotlight = index;
+  }
+
+  private restoreLeaf(i: number): void {
+    const t = this.leafTransforms[i];
+    this.spotS.setScalar(t.scale);
+    this.spotM.compose(t.pos, t.quat, this.spotS);
+    this.leafMesh.setMatrixAt(i, this.spotM);
+    this.leafMesh.instanceMatrix.needsUpdate = true;
+  }
+
   update(t: number): void {
     this.group.rotation.z = Math.sin(t * 0.4) * 0.008;
     this.group.rotation.x = Math.cos(t * 0.3) * 0.006;
+
+    if (this.spotlight !== null && this.spotlight < this.leafMesh.count) {
+      const lt = this.leafTransforms[this.spotlight];
+      this.spotS.setScalar(lt.scale * (1 + 0.22 * Math.sin(t * 5)));
+      this.spotM.compose(lt.pos, lt.quat, this.spotS);
+      this.leafMesh.setMatrixAt(this.spotlight, this.spotM);
+      this.leafMesh.instanceMatrix.needsUpdate = true;
+    }
   }
 }
