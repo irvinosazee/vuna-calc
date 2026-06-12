@@ -103,6 +103,23 @@ Two upgrades to the live Veritas Journey site:
 - Existing 46 tests keep passing; browser-based visual verification of
   chapters, ticker, spotlight, legend, and walk controls before merge.
 
+## Part 3 — Calculator journey skin
+
+The calculator page currently looks like a separate app (white Bootstrap +
+neumorphic card). To make the whole site feel like one product:
+
+- A new stylesheet `public/calculator/assets/css/journey-skin.css`, loaded
+  LAST in `calculator/index.html`, re-themes the page with the journey
+  palette: the same green gradient sky background, glass (blurred
+  translucent) calculator card with emerald accents, Sora/JetBrains Mono
+  typography, journey-style pill buttons, and the "🌳 Journey" back-link
+  restyled to match the journey's mode buttons.
+- CSS-only: no markup changes beyond the one stylesheet link + Google Fonts
+  link; `src/calculator.js`, `assets/js/script.js`, and all Jest tests stay
+  byte-identical. The existing dark/light toggle keeps working (the skin
+  themes both states; "dark" stays the deep-forest look, "light" a mint
+  variant).
+
 ## Out of scope
 - The "forest of 4 clearings" walk world (explicitly deferred).
 - Persisted state (hints reset each page load).
