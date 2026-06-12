@@ -47,7 +47,7 @@ export class Environment {
       const r = 5 + pseudoRandom(i + 51) * 20;
       const s = 0.4 + pseudoRandom(i + 52) * 1.4;
       const shrub = new THREE.Mesh(new THREE.IcosahedronGeometry(s, 0), shrubMat);
-      shrub.position.set(Math.cos(a) * r, s * 0.45, Math.sin(a) * r);
+      shrub.position.set(Math.cos(a) * r, s * 0.9, Math.sin(a) * r);
       this.group.add(shrub);
     }
   }

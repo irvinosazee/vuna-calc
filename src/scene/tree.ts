@@ -14,16 +14,27 @@ function makeLabel(text: string): THREE.Sprite {
   const canvas = document.createElement('canvas');
   canvas.width = 256;
   canvas.height = 128;
-  const ctx = canvas.getContext('2d')!;
-  ctx.font = 'bold 44px Sora, sans-serif';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillStyle = '#d8ffe9';
-  ctx.shadowColor = 'rgba(60, 255, 160, 0.8)';
-  ctx.shadowBlur = 16;
-  ctx.fillText(text, 128, 64);
+  const texture = new THREE.CanvasTexture(canvas);
+
+  const draw = (): void => {
+    const ctx = canvas.getContext('2d')!;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.font = 'bold 44px Sora, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#d8ffe9';
+    ctx.shadowColor = 'rgba(60, 255, 160, 0.8)';
+    ctx.shadowBlur = 16;
+    ctx.fillText(text, 128, 64);
+    texture.needsUpdate = true;
+  };
+
+  draw();
+  // Redraw once webfonts finish loading so labels use Sora, not the fallback.
+  document.fonts.ready.then(draw).catch(() => {});
+
   const sprite = new THREE.Sprite(
-    new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(canvas), transparent: true, depthWrite: false }),
+    new THREE.SpriteMaterial({ map: texture, transparent: true, depthWrite: false }),
   );
   sprite.scale.set(3.4, 1.7, 1);
   return sprite;
@@ -63,9 +74,15 @@ export class JourneyTree {
     this.leafMesh = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(0.42, 0), leafMat, leaves.length);
     const m = new THREE.Matrix4();
     const color = new THREE.Color();
+    const pos = new THREE.Vector3();
+    const quat = new THREE.Quaternion();
+    const scl = new THREE.Vector3();
     leaves.forEach((leaf, i) => {
       const s = 0.8 + pseudoRandom(i * 7) * 0.5;
-      m.makeScale(s, s, s).setPosition(leaf.pos.x, leaf.pos.y, leaf.pos.z);
+      pos.set(leaf.pos.x, leaf.pos.y, leaf.pos.z);
+      quat.setFromAxisAngle(UP, pseudoRandom(i * 7 + 3) * Math.PI * 2);
+      scl.set(s, s, s);
+      m.compose(pos, quat, scl);
       this.leafMesh.setMatrixAt(i, m);
       const course = levels[leaf.levelIdx].semesters[leaf.semIdx].courses[leaf.courseIdx];
       this.leafMesh.setColorAt(i, color.set(theme.families[courseFamily(course.code)]));
@@ -84,7 +101,9 @@ export class JourneyTree {
       this.group.add(ring);
 
       const label = makeLabel(`${(i + 1) * 100} LEVEL`);
-      label.position.set(3, y + 0.6, 0);
+      // Place each label perpendicular to its level's first-semester limb so they never overlap.
+      const labelAngle = i * 1.1 + Math.PI / 2;
+      label.position.set(Math.cos(labelAngle) * 3, y + 0.6, Math.sin(labelAngle) * 3);
       this.group.add(label);
     });
   }
