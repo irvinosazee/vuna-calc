@@ -151,6 +151,10 @@ export function createOverlay(
     if (e.key === 'Escape' && calcOpen) closeCalc();
   });
 
+  window.addEventListener('message', (e) => {
+    if (e.data === 'vj-close-calc' && calcOpen) closeCalc();
+  });
+
   let pinned = false; // a clicked leaf overrides the auto ticker until closed
   let shownChapter = ''; // "levelIdx-semIdx" currently in the panel
   let tickerKey = ''; // course currently in the ticker

@@ -18,7 +18,14 @@
 </head>
 
 <body>
-  <script>if (new URLSearchParams(location.search).has('embed')) document.body.classList.add('embed');</script>
+  <script>
+    if (new URLSearchParams(location.search).has('embed')) {
+      document.body.classList.add('embed');
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') window.parent.postMessage('vj-close-calc', '*');
+      });
+    }
+  </script>
   <a href="../" class="btn btn-outline-secondary" title="Back to the 3D journey"
     style="position: fixed; top: 1rem; left: 1rem; z-index: 10">🌳 Journey</a>
   <div class="container">
