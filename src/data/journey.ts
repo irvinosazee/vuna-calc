@@ -54,6 +54,24 @@ export const theme = {
     SCI: '#5eead4', // physics & statistics — light teal
     LAB: '#f0e68c', // labs, SIWES, practicum — gold-green
   },
+  sky: {
+    day: {
+      grad: ['#061f13', '#0a2e1d', '#16573a', '#2c8a5b'],
+      fog: '#16573a',
+      hemiSky: '#bdf5d3', hemiGround: '#06281a', hemiInt: 2.2,
+      sun: '#eafff2', sunInt: 2.2,
+      fly: '#c8f96e', flyOpacity: 0.85, flySize: 0.18,
+      star: 0,
+    },
+    night: {
+      grad: ['#05060f', '#0a0e2a', '#141a3a', '#20264f'],
+      fog: '#0a0e2a',
+      hemiSky: '#2a3470', hemiGround: '#05060f', hemiInt: 0.7,
+      sun: '#9fb3ff', sunInt: 0.5,
+      fly: '#dcff9e', flyOpacity: 1, flySize: 0.32,
+      star: 0.9,
+    },
+  },
 } as const;
 
 export type Family = keyof typeof theme.families;

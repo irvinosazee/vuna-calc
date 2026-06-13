@@ -3,6 +3,9 @@ import { pseudoRandom } from '../journey/layout';
 
 export class Environment {
   readonly group = new THREE.Group();
+  readonly hemi: THREE.HemisphereLight;
+  readonly sun: THREE.DirectionalLight;
+  readonly fireflyMaterial: THREE.PointsMaterial;
   private readonly fireflies: THREE.Points;
 
   constructor(particleCount: number, height: number, lush: boolean) {
@@ -13,10 +16,11 @@ export class Environment {
     ground.rotation.x = -Math.PI / 2;
     this.group.add(ground);
 
-    this.group.add(new THREE.HemisphereLight('#bdf5d3', '#06281a', 2.2));
-    const sun = new THREE.DirectionalLight('#eafff2', 2.2);
-    sun.position.set(8, height + 10, 5);
-    this.group.add(sun);
+    this.hemi = new THREE.HemisphereLight('#bdf5d3', '#06281a', 2.2);
+    this.group.add(this.hemi);
+    this.sun = new THREE.DirectionalLight('#eafff2', 2.2);
+    this.sun.position.set(8, height + 10, 5);
+    this.group.add(this.sun);
 
     const positions = new Float32Array(particleCount * 3);
     for (let i = 0; i < particleCount; i++) {
@@ -28,17 +32,15 @@ export class Environment {
     }
     const geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    this.fireflies = new THREE.Points(
-      geo,
-      new THREE.PointsMaterial({
-        color: '#c8f96e',
-        size: 0.18,
-        transparent: true,
-        opacity: 0.85,
-        depthWrite: false,
-        blending: THREE.AdditiveBlending,
-      }),
-    );
+    this.fireflyMaterial = new THREE.PointsMaterial({
+      color: '#c8f96e',
+      size: 0.18,
+      transparent: true,
+      opacity: 0.85,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+    });
+    this.fireflies = new THREE.Points(geo, this.fireflyMaterial);
     this.group.add(this.fireflies);
 
     const shrubMat = new THREE.MeshStandardMaterial({ color: '#1d5c38', flatShading: true, roughness: 1 });
