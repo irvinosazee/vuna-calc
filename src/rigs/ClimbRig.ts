@@ -35,7 +35,7 @@ export class ClimbRig implements CameraRig {
   private avLean = 0;
   private camDist = CAM_DIST;
   private bobVal = 0;
-  private crownAt: number | null = null;
+  private crownStoodAt: number | null = null;
   private readonly avatarEuler = new THREE.Euler(0, 0, 0, 'YXZ');
   private readonly target = new THREE.Vector3();
   private readonly desired = new THREE.Vector3();
@@ -50,7 +50,7 @@ export class ClimbRig implements CameraRig {
   enter(): void {
     this.disposeListeners();
     this.elapsed = 0;
-    this.crownAt = null;
+    this.crownStoodAt = null;
     this.avatarAngle = CLIMB_FACE_ANGLE;
     this.avLean = 0;
     this.camDist = CAM_DIST;
@@ -131,15 +131,26 @@ export class ClimbRig implements CameraRig {
       }
     } else {
       const top = trunkPointAt(this.layout, this.layout.trunkHeight);
-      g.position.set(top.x, this.layout.trunkHeight + 0.1, top.z);
-      if (this.crownAt === null) this.crownAt = this.elapsed;
-      const sinceCrown = this.elapsed - this.crownAt;
-      // Victory: cheer first, then the slow turn surveying the grove.
-      this.avYaw += dt * (sinceCrown < CHEER_SECS ? 0 : 0.4);
+      // Final scramble: ease up through the canopy and stand ON the dome.
+      const standY = this.layout.trunkHeight + 3.1;
+      g.position.x = top.x;
+      g.position.z = top.z;
+      g.position.y += (standY - g.position.y) * (1 - Math.exp(-1.5 * dt));
+      const rising = standY - g.position.y > 0.25;
+      if (!rising && this.crownStoodAt === null) this.crownStoodAt = this.elapsed;
       this.avLean = 0;
-      this.avatarEuler.set(0, this.avYaw, 0);
-      g.quaternion.setFromEuler(this.avatarEuler);
-      this.avatar.setPose(sinceCrown < CHEER_SECS ? 'cheer' : 'idle');
+      if (rising) {
+        this.avatar.setPose('climb');
+        this.avatarEuler.set(0, this.avYaw, 0);
+        g.quaternion.setFromEuler(this.avatarEuler);
+      } else {
+        const stood = this.elapsed - (this.crownStoodAt ?? this.elapsed);
+        // Victory: cheer first, then the slow turn surveying the grove.
+        this.avYaw += dt * (stood < CHEER_SECS ? 0 : 0.4);
+        this.avatarEuler.set(0, this.avYaw, 0);
+        g.quaternion.setFromEuler(this.avatarEuler);
+        this.avatar.setPose(stood < CHEER_SECS ? 'cheer' : 'idle');
+      }
     }
     this.avatar.update(this.elapsed);
 
