@@ -7,3 +7,8 @@ dist/
 .env
 .env.*
 public/calculator/src/
+
+# Local tooling / plugin cache — never commit
+.agents/
+.claude/
+skills-lock.json
