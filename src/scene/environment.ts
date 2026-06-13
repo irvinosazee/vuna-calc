@@ -63,6 +63,8 @@ export class Environment {
       gm.makeScale(s, s, s).setPosition(Math.cos(a) * r, 0.13 * s, Math.sin(a) * r);
       grass.setMatrixAt(i, gm);
     }
+    grass.instanceMatrix.needsUpdate = true;
+    grass.computeBoundingSphere();
     this.group.add(grass);
 
     const flowerCount = lush ? 20 : 10;
@@ -74,6 +76,8 @@ export class Environment {
       gm.makeScale(1, 1, 1).setPosition(Math.cos(a) * r, 0.1, Math.sin(a) * r);
       flowers.setMatrixAt(i, gm);
     }
+    flowers.instanceMatrix.needsUpdate = true;
+    flowers.computeBoundingSphere();
     this.group.add(flowers);
   }
 
