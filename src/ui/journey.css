@@ -125,6 +125,9 @@ body.no-webgl #spacer {
   backdrop-filter: blur(8px);
   text-decoration: none;
   transition: background 0.2s, border-color 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .mode-btn:hover:not(:disabled) {
