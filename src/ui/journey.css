@@ -83,6 +83,7 @@ body.no-webgl #spacer {
 }
 
 .modes,
+.calc-modal,
 .course-card,
 .follow-chip,
 .finale:not(.hidden) .finale-actions {
@@ -592,4 +593,101 @@ body.no-webgl #spacer {
 .follow-chip.active {
   background: rgba(52, 211, 153, 0.3);
   border-color: #34d399;
+}
+
+/* ── Calculator popup (glass side-card) ────────────────────────── */
+
+.calc-modal {
+  position: fixed;
+  top: 50%;
+  right: 1.6rem;
+  transform: translateY(-50%);
+  width: 380px;
+  max-width: calc(100vw - 3.2rem);
+  height: min(560px, 82vh);
+  display: flex;
+  flex-direction: column;
+  background: rgba(8, 42, 26, 0.55);
+  border: 1px solid rgba(150, 255, 190, 0.3);
+  border-radius: 22px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(16px);
+  overflow: hidden;
+  z-index: 8;
+  transition: opacity 0.3s, transform 0.3s;
+}
+
+.calc-modal.hidden {
+  opacity: 0;
+  transform: translateY(-50%) translateX(24px);
+  pointer-events: none;
+}
+
+.calc-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.7rem 1rem;
+  font: 700 0.9rem 'Sora', sans-serif;
+  color: #d8ffe9;
+  border-bottom: 1px solid rgba(150, 255, 190, 0.18);
+}
+
+.calc-modal-close {
+  background: none;
+  border: none;
+  color: #a8e6c5;
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.calc-frame {
+  flex: 1;
+  width: 100%;
+  border: 0;
+  background: transparent;
+}
+
+/* ── Irvin speech bubble ───────────────────────────────────────── */
+
+.irvin-bubble {
+  position: fixed;
+  transform: translate(-50%, -120%);
+  padding: 0.45rem 0.85rem;
+  background: rgba(6, 40, 24, 0.85);
+  border: 1px solid rgba(150, 255, 190, 0.35);
+  border-radius: 999px;
+  font: 600 0.8rem 'Sora', sans-serif;
+  color: #d8ffe9;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 7;
+  transition: opacity 0.3s;
+}
+
+.irvin-bubble.hidden {
+  opacity: 0;
+}
+
+@media (max-width: 640px) {
+  .calc-modal {
+    top: auto;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    transform: none;
+    width: 100vw;
+    max-width: none;
+    height: 60vh;
+    border-radius: 22px 22px 0 0;
+    border-left: none;
+    border-right: none;
+    border-bottom: none;
+  }
+  .calc-modal.hidden {
+    transform: translateY(100%);
+  }
 }

@@ -21,6 +21,7 @@ export interface OverlayHandles {
   update(progress: number, mode: Mode, pos: ChapterPosition): void;
   showCourse(hit: CourseHit): void;
   hideCourse(): void;
+  setIrvinBubble(screen: { x: number; y: number } | null): void;
 }
 
 const LEGEND = [
@@ -35,6 +36,7 @@ export function createOverlay(
   onMode: (m: Mode) => void,
   touch: boolean,
   onFollow: (follow: boolean) => void,
+  onCalc: (open: boolean) => void,
 ): OverlayHandles {
   root.innerHTML = `
     <header class="hud-top">
@@ -43,7 +45,7 @@ export function createOverlay(
         <button class="mode-btn active" data-mode="journey">Journey</button>
         <button class="mode-btn" data-mode="explore">Explore</button>
         <button class="mode-btn" data-mode="climb">Climb</button>
-        <a class="mode-btn calc-link" href="./calculator/">Calculator</a>
+        <button class="mode-btn calc-link" data-calc="1">Calculator</button>
       </nav>
     </header>
     <div class="beats">
@@ -79,9 +81,17 @@ export function createOverlay(
       <p class="finale-stats">${levels.length} levels · ${levels.length * 2} semesters · ${allCourses.length} courses · ${totalUnits} credit units</p>
       <div class="finale-actions">
         <button class="mode-btn" data-mode="explore">Explore the tree</button>
-        <a class="mode-btn calc-link" href="./calculator/">Open the calculator</a>
+        <button class="mode-btn calc-link" data-calc="1">Open the calculator</button>
       </div>
-    </section>`;
+    </section>
+    <aside class="calc-modal hidden">
+      <div class="calc-modal-head">
+        <span class="calc-modal-title">🧮 SEN Calculator</span>
+        <button class="calc-modal-close" aria-label="Close calculator">×</button>
+      </div>
+      <iframe class="calc-frame" title="VUNA Calculator"></iframe>
+    </aside>
+    <div class="irvin-bubble hidden">Hi, I'm Irvin 👋 · VUG/SEN/22/8386</div>`;
 
   const beats = [...root.querySelectorAll<HTMLElement>('.beat')];
   const chapterPanel = root.querySelector<HTMLElement>('.chapter-panel')!;
@@ -100,12 +110,45 @@ export function createOverlay(
   const cardMeta = root.querySelector<HTMLElement>('.card-meta')!;
   const modeButtons = [...root.querySelectorAll<HTMLButtonElement>('button.mode-btn[data-mode]')];
   const followChip = root.querySelector<HTMLButtonElement>('.follow-chip')!;
+  const calcModal = root.querySelector<HTMLElement>('.calc-modal')!;
+  const calcFrame = root.querySelector<HTMLIFrameElement>('.calc-frame')!;
+  const irvinBubble = root.querySelector<HTMLElement>('.irvin-bubble')!;
+
   let following = false;
-  followChip.addEventListener('click', () => {
-    following = !following;
-    followChip.classList.toggle('active', following);
-    followChip.setAttribute('aria-pressed', String(following));
-    onFollow(following);
+  let calcOpen = false;
+
+  function setFollow(on: boolean): void {
+    following = on;
+    followChip.classList.toggle('active', on);
+    followChip.setAttribute('aria-pressed', String(on));
+    onFollow(on);
+  }
+
+  followChip.addEventListener('click', () => setFollow(!following));
+
+  function openCalc(): void {
+    if (calcOpen) return;
+    if (!calcFrame.src) calcFrame.src = './calculator/?embed=1'; // lazy first load
+    calcOpen = true;
+    calcModal.classList.remove('hidden');
+    onCalc(true); // main → explore mode
+    setFollow(true); // camera tracks the roaming Irvin behind the glass
+  }
+
+  function closeCalc(): void {
+    if (!calcOpen) return;
+    calcOpen = false;
+    calcModal.classList.add('hidden');
+    setFollow(false);
+    onCalc(false); // main → journey mode
+  }
+
+  for (const b of root.querySelectorAll<HTMLElement>('[data-calc]')) {
+    b.addEventListener('click', openCalc);
+  }
+  calcModal.querySelector('.calc-modal-close')!.addEventListener('click', closeCalc);
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && calcOpen) closeCalc();
   });
 
   let pinned = false; // a clicked leaf overrides the auto ticker until closed
@@ -114,7 +157,16 @@ export function createOverlay(
   let leafHintDone = false;
 
   for (const btn of modeButtons) {
-    btn.addEventListener('click', () => onMode(btn.dataset.mode as Mode));
+    btn.addEventListener('click', () => {
+      // A header mode button dismisses the calc popup (visual only) so the
+      // chosen mode isn't hidden behind the card.
+      if (calcOpen) {
+        calcOpen = false;
+        calcModal.classList.add('hidden');
+        setFollow(false);
+      }
+      onMode(btn.dataset.mode as Mode);
+    });
   }
   card.querySelector('.card-close')!.addEventListener('click', () => {
     pinned = false;
@@ -154,12 +206,7 @@ export function createOverlay(
       finale.classList.toggle('hidden', !journey || pos.phase !== 'finale');
       for (const btn of modeButtons) btn.classList.toggle('active', btn.dataset.mode === mode);
       followChip.classList.toggle('hidden', mode !== 'explore');
-      if (mode !== 'explore' && following) {
-        following = false;
-        followChip.classList.remove('active');
-        followChip.setAttribute('aria-pressed', 'false');
-        onFollow(false);
-      }
+      if (mode !== 'explore' && following) setFollow(false);
 
       if (mode === 'climb') {
         label.textContent = 'Watch the climb — drag to swing the camera';
@@ -225,6 +272,16 @@ export function createOverlay(
     hideCourse(): void {
       pinned = false;
       card.classList.add('hidden');
+    },
+
+    setIrvinBubble(screen: { x: number; y: number } | null): void {
+      if (!screen) {
+        irvinBubble.classList.add('hidden');
+        return;
+      }
+      irvinBubble.style.left = `${screen.x}px`;
+      irvinBubble.style.top = `${screen.y}px`;
+      irvinBubble.classList.remove('hidden');
     },
   };
 }
