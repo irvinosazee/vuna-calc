@@ -61,7 +61,7 @@ export function createOverlay(
       <div class="legend">
         ${LEGEND.map((l) => `<span class="legend-item"><i style="background:${l.color}"></i>${l.label}</span>`).join('')}
       </div>
-      <button class="follow-chip hidden">👁 Follow</button>
+      <button class="follow-chip hidden" aria-pressed="false">👁 Follow</button>
       <div class="level-label">Prologue</div>
       <div class="progress-track"><div class="progress-fill"></div></div>
       <div class="scroll-hint">Scroll to grow ↓</div>
@@ -104,6 +104,7 @@ export function createOverlay(
   followChip.addEventListener('click', () => {
     following = !following;
     followChip.classList.toggle('active', following);
+    followChip.setAttribute('aria-pressed', String(following));
     onFollow(following);
   });
 
@@ -156,6 +157,7 @@ export function createOverlay(
       if (mode !== 'explore' && following) {
         following = false;
         followChip.classList.remove('active');
+        followChip.setAttribute('aria-pressed', 'false');
         onFollow(false);
       }
 

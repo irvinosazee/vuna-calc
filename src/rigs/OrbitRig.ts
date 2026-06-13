@@ -39,6 +39,7 @@ export class OrbitRig implements CameraRig {
   }
 
   dispose(): void {
+    this.follow = null;
     this.controls?.dispose();
     this.controls = undefined;
   }
