@@ -24,6 +24,7 @@ export class Avatar {
   private readonly lLeg = new THREE.Group();
   private readonly rLeg = new THREE.Group();
   private readonly torso: THREE.Mesh;
+  private waveUntil = 0;
 
   constructor() {
     this.torso = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.2, 0.55, 6), flat(TORSO));
@@ -53,7 +54,23 @@ export class Avatar {
     this.pose = pose;
   }
 
+  /** One-shot wave that overrides the current pose for ~1.8s from `now`. */
+  wave(now: number): void {
+    this.waveUntil = now + 1.8;
+  }
+
   update(t: number): void {
+    if (t < this.waveUntil) {
+      this.lLeg.rotation.x = 0;
+      this.rLeg.rotation.x = 0;
+      this.lArm.rotation.x = 0;
+      this.lArm.rotation.z = 0;
+      this.rArm.rotation.x = -2.6; // right arm raised
+      this.rArm.rotation.z = -0.3 + Math.sin(t * 10) * 0.45; // waving
+      this.body.position.y = 0;
+      this.torso.scale.setScalar(1);
+      return;
+    }
     if (this.pose === 'walk') {
       const swing = Math.sin(t * 7);
       this.lLeg.rotation.x = swing * 0.65;
