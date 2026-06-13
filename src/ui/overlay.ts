@@ -10,6 +10,7 @@ import {
 } from '../data/journey';
 import type { ChapterPosition } from '../journey/chapters';
 import type { Mode } from '../rigs/types';
+import { CalcWindow } from '../calc/window';
 
 export interface CourseHit {
   course: Course;
@@ -84,13 +85,6 @@ export function createOverlay(
         <button class="mode-btn calc-link" data-calc="1">Open the calculator</button>
       </div>
     </section>
-    <aside class="calc-modal hidden">
-      <div class="calc-modal-head">
-        <span class="calc-modal-title">🧮 SEN Calculator</span>
-        <button class="calc-modal-close" aria-label="Close calculator">×</button>
-      </div>
-      <iframe class="calc-frame" title="VUNA Calculator"></iframe>
-    </aside>
     <div class="irvin-bubble hidden">Hi, I'm Irvin 👋 · VUG/SEN/22/8386</div>`;
 
   const beats = [...root.querySelectorAll<HTMLElement>('.beat')];
@@ -110,12 +104,9 @@ export function createOverlay(
   const cardMeta = root.querySelector<HTMLElement>('.card-meta')!;
   const modeButtons = [...root.querySelectorAll<HTMLButtonElement>('button.mode-btn[data-mode]')];
   const followChip = root.querySelector<HTMLButtonElement>('.follow-chip')!;
-  const calcModal = root.querySelector<HTMLElement>('.calc-modal')!;
-  const calcFrame = root.querySelector<HTMLIFrameElement>('.calc-frame')!;
   const irvinBubble = root.querySelector<HTMLElement>('.irvin-bubble')!;
 
   let following = false;
-  let calcOpen = false;
 
   function setFollow(on: boolean): void {
     following = on;
@@ -126,34 +117,21 @@ export function createOverlay(
 
   followChip.addEventListener('click', () => setFollow(!following));
 
-  function openCalc(): void {
-    if (calcOpen) return;
-    if (!calcFrame.src) calcFrame.src = './calculator/?embed=1'; // lazy first load
-    calcOpen = true;
-    calcModal.classList.remove('hidden');
-    onCalc(true); // main → explore mode
-    setFollow(true); // camera tracks the roaming Irvin behind the glass
-  }
-
-  function closeCalc(): void {
-    if (!calcOpen) return;
-    calcOpen = false;
-    calcModal.classList.add('hidden');
+  const calcWindow = new CalcWindow(() => {
     setFollow(false);
-    onCalc(false); // main → journey mode
-  }
+    onCalc(false);
+  });
+  root.appendChild(calcWindow.element);
 
+  function openCalc(): void {
+    if (calcWindow.isOpen()) return;
+    calcWindow.open();
+    onCalc(true); // main → explore mode
+    setFollow(true); // camera tracks the roaming Irvin behind the window
+  }
   for (const b of root.querySelectorAll<HTMLElement>('[data-calc]')) {
     b.addEventListener('click', openCalc);
   }
-  calcModal.querySelector('.calc-modal-close')!.addEventListener('click', closeCalc);
-  window.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && calcOpen) closeCalc();
-  });
-
-  window.addEventListener('message', (e) => {
-    if (e.data === 'vj-close-calc' && calcOpen) closeCalc();
-  });
 
   let pinned = false; // a clicked leaf overrides the auto ticker until closed
   let shownChapter = ''; // "levelIdx-semIdx" currently in the panel
@@ -162,12 +140,10 @@ export function createOverlay(
 
   for (const btn of modeButtons) {
     btn.addEventListener('click', () => {
-      // A header mode button dismisses the calc popup (visual only) so the
+      // A header mode button dismisses the calc window so the
       // chosen mode isn't hidden behind the card.
-      if (calcOpen) {
-        calcOpen = false;
-        calcModal.classList.add('hidden');
-        setFollow(false);
+      if (calcWindow.isOpen()) {
+        calcWindow.close(); // close() already calls setFollow(false) + onCalc(false)
       }
       onMode(btn.dataset.mode as Mode);
     });
