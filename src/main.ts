@@ -6,6 +6,9 @@ import { JourneyTree } from './scene/tree';
 import { Environment } from './scene/environment';
 import { Avatar } from './scene/avatar';
 import { AmbientWander } from './scene/wander';
+import { Sky } from './scene/sky';
+import { Sound } from './audio/sound';
+import { capturePhoto } from './ui/photo';
 import { ScrollRig } from './rigs/ScrollRig';
 import { OrbitRig } from './rigs/OrbitRig';
 import { ClimbRig } from './rigs/ClimbRig';
@@ -26,7 +29,12 @@ if (!webglAvailable()) {
 function boot(): void {
   const isMobile = window.matchMedia('(pointer: coarse)').matches;
 
-  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  // preserveDrawingBuffer lets photo mode read the last frame from the canvas.
+  const renderer = new THREE.WebGLRenderer({
+    antialias: true,
+    alpha: true,
+    preserveDrawingBuffer: true,
+  });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.75 : 2));
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.domElement.classList.add('webgl');
@@ -51,6 +59,12 @@ function boot(): void {
   scene.add(avatar.group);
   const wander = new AmbientWander(avatar);
 
+  // Ambience: day/night + sound, restored from localStorage.
+  const startNight = localStorage.getItem('vj-time') === 'night';
+  const startMuted = localStorage.getItem('vj-sound') !== 'on'; // muted by default
+  const sky = new Sky(scene, env.hemi, env.sun, env.fireflyMaterial, startNight);
+  const sound = new Sound(startMuted);
+
   const scrollRig = new ScrollRig(tree.layout.cameraPoints);
   const orbitRig = new OrbitRig(renderer.domElement, tree.layout.trunkHeight);
   const climbRig = new ClimbRig(renderer.domElement, avatar, tree.layout);
@@ -62,6 +76,7 @@ function boot(): void {
 
   const clock = new THREE.Clock();
   let bubbleUntil = 0;
+  let rustleAccum = 0;
   const proj = new THREE.Vector3();
 
   function setMode(next: Mode): void {
@@ -70,13 +85,10 @@ function boot(): void {
     mode = next;
     rig = next === 'explore' ? orbitRig : next === 'climb' ? climbRig : scrollRig;
     rig.enter(camera);
-    // Non-journey modes lock page scroll (class also used by explore).
     document.body.classList.toggle('mode-explore', next !== 'journey');
   }
 
   function onCalc(open: boolean): void {
-    // Opening the calculator drops into the ambient explore view (Irvin roams
-    // behind the glass card); closing returns to the guided journey.
     setMode(open ? 'explore' : 'journey');
   }
 
@@ -86,6 +98,19 @@ function boot(): void {
     isMobile,
     (follow) => orbitRig.setFollow(follow ? () => avatar.group.position : null),
     onCalc,
+    {
+      night0: startNight,
+      muted0: startMuted,
+      onTime: (night) => {
+        sky.set(night);
+        localStorage.setItem('vj-time', night ? 'night' : 'day');
+      },
+      onSound: (muted) => {
+        sound.setMuted(muted);
+        localStorage.setItem('vj-sound', muted ? 'off' : 'on');
+      },
+      onPhoto: () => capturePhoto(renderer, () => ui.flashSaved()),
+    },
   );
 
   const raycaster = new THREE.Raycaster();
@@ -105,6 +130,7 @@ function boot(): void {
       bubbleUntil = clock.elapsedTime + 3;
     } else if (leafHit?.instanceId !== undefined) {
       ui.showCourse(tree.leafRefs[leafHit.instanceId]);
+      sound.chime(); // a soft chime when a course card opens
     } else {
       ui.hideCourse();
     }
@@ -120,9 +146,8 @@ function boot(): void {
     const dt = Math.min(clock.getDelta(), 0.05);
     const t = clock.elapsedTime;
     rig.update(camera, dt);
+    sky.update(dt);
 
-    // Always derived from scroll progress (not the active rig) so the guided
-    // position is preserved when the user dips into explore/climb and back.
     const pos = chapterAt(scrollRig.progress, levels);
     const growth =
       mode !== 'journey' ? 1 : Math.min(1, Math.max(0, (scrollRig.progress - 0.04) / 0.7));
@@ -133,11 +158,22 @@ function boot(): void {
         : null,
     );
     if (mode !== 'climb') wander.update(t, dt, mode);
+
+    // Gentle periodic rustle while climbing.
+    if (mode === 'climb') {
+      rustleAccum += dt;
+      if (rustleAccum >= 4) {
+        rustleAccum = 0;
+        sound.rustle();
+      }
+    } else {
+      rustleAccum = 0;
+    }
+
     tree.update(t);
     env.update(t);
     ui.update(scrollRig.progress, mode, pos);
 
-    // Irvin speech bubble follows his projected head while active.
     if (t < bubbleUntil) {
       proj.set(avatar.group.position.x, avatar.group.position.y + 1.6, avatar.group.position.z);
       proj.project(camera);

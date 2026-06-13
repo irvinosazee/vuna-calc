@@ -23,6 +23,15 @@ export interface OverlayHandles {
   showCourse(hit: CourseHit): void;
   hideCourse(): void;
   setIrvinBubble(screen: { x: number; y: number } | null): void;
+  flashSaved(): void;
+}
+
+export interface AmbienceOpts {
+  night0: boolean;
+  muted0: boolean;
+  onTime: (night: boolean) => void;
+  onSound: (muted: boolean) => void;
+  onPhoto: () => void;
 }
 
 const LEGEND = [
@@ -38,11 +47,15 @@ export function createOverlay(
   touch: boolean,
   onFollow: (follow: boolean) => void,
   onCalc: (open: boolean) => void,
+  ambience: AmbienceOpts,
 ): OverlayHandles {
   root.innerHTML = `
     <header class="hud-top">
       <div class="brand">🌳 Veritas Journey</div>
       <nav class="modes">
+        <button class="icon-btn" data-act="time" aria-label="Toggle day and night">${ambience.night0 ? '☾' : '☀'}</button>
+        <button class="icon-btn" data-act="sound" aria-label="Toggle sound">${ambience.muted0 ? '🔇' : '🔊'}</button>
+        <button class="icon-btn" data-act="photo" aria-label="Save a photo">📷</button>
         <button class="mode-btn active" data-mode="journey">Journey</button>
         <button class="mode-btn" data-mode="explore">Explore</button>
         <button class="mode-btn" data-mode="climb">Climb</button>
@@ -85,7 +98,8 @@ export function createOverlay(
         <button class="mode-btn calc-link" data-calc="1">Open the calculator</button>
       </div>
     </section>
-    <div class="irvin-bubble hidden">Hi, I'm Irvin 👋 · VUG/SEN/22/8386</div>`;
+    <div class="irvin-bubble hidden">Hi, I'm Irvin 👋 · VUG/SEN/22/8386</div>
+    <div class="photo-toast hidden">Saved 📷</div>`;
 
   const beats = [...root.querySelectorAll<HTMLElement>('.beat')];
   const chapterPanel = root.querySelector<HTMLElement>('.chapter-panel')!;
@@ -132,6 +146,23 @@ export function createOverlay(
   for (const b of root.querySelectorAll<HTMLElement>('[data-calc]')) {
     b.addEventListener('click', openCalc);
   }
+
+  const photoToast = root.querySelector<HTMLElement>('.photo-toast')!;
+  const timeBtn = root.querySelector<HTMLButtonElement>('[data-act="time"]')!;
+  const soundBtn = root.querySelector<HTMLButtonElement>('[data-act="sound"]')!;
+  let night = ambience.night0;
+  let muted = ambience.muted0;
+  timeBtn.addEventListener('click', () => {
+    night = !night;
+    timeBtn.textContent = night ? '☾' : '☀';
+    ambience.onTime(night);
+  });
+  soundBtn.addEventListener('click', () => {
+    muted = !muted;
+    soundBtn.textContent = muted ? '🔇' : '🔊';
+    ambience.onSound(muted);
+  });
+  root.querySelector('[data-act="photo"]')!.addEventListener('click', () => ambience.onPhoto());
 
   let pinned = false; // a clicked leaf overrides the auto ticker until closed
   let shownChapter = ''; // "levelIdx-semIdx" currently in the panel
@@ -262,6 +293,11 @@ export function createOverlay(
       irvinBubble.style.left = `${screen.x}px`;
       irvinBubble.style.top = `${screen.y}px`;
       irvinBubble.classList.remove('hidden');
+    },
+
+    flashSaved(): void {
+      photoToast.classList.remove('hidden');
+      window.setTimeout(() => photoToast.classList.add('hidden'), 1500);
     },
   };
 }
