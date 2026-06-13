@@ -33,6 +33,7 @@ export class ClimbRig implements CameraRig {
   private avatarAngle = CLIMB_FACE_ANGLE;
   private avYaw = 0;
   private avLean = 0;
+  private bobVal = 0;
   private crownAt: number | null = null;
   private readonly avatarEuler = new THREE.Euler(0, 0, 0, 'YXZ');
   private readonly target = new THREE.Vector3();
@@ -51,6 +52,8 @@ export class ClimbRig implements CameraRig {
     this.crownAt = null;
     this.avatarAngle = CLIMB_FACE_ANGLE;
     this.avLean = 0;
+    this.avYaw = 0;
+    this.bobVal = 0;
 
     const down = (e: PointerEvent): void => {
       if (this.lookId !== null) return;
@@ -105,8 +108,11 @@ export class ClimbRig implements CameraRig {
       const a = CLIMB_FACE_ANGLE + s.height * 0.12; // slight spiral
       this.avatarAngle = a;
       // Render-only reach rhythm: each arm cycle visibly pulls the body up.
-      const bob =
+      // Eased so the climb→pause transition never snaps.
+      const bobTarget =
         s.phase === 'climb' ? Math.max(0, Math.sin(this.elapsed * BOB_FREQ)) * BOB_AMP : 0;
+      this.bobVal += (bobTarget - this.bobVal) * (1 - Math.exp(-8 * dt));
+      const bob = this.bobVal;
       g.position.set(
         p.x + Math.cos(a) * (p.radius + HUG_GAP),
         s.height + bob,
