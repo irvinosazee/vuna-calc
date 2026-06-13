@@ -37,7 +37,7 @@ export const student = {
 export const introBeats: IntroBeat[] = [
   { title: '2022', text: 'A seed lands in Abuja…' },
   { title: student.name, text: `${student.matric} · ${student.programme} · ${student.university}` },
-  { title: 'It takes root', text: 'Scroll to grow the tree — four levels, eight semesters, 79 courses.' },
+  { title: 'It takes a man', text: 'Scroll to grow the tree — four levels, eight semesters, 79 courses.' },
 ];
 
 export const theme = {
