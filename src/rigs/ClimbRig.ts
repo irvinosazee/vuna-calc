@@ -104,7 +104,9 @@ export class ClimbRig implements CameraRig {
     // Keep the camera on the avatar's side of the trunk while it spirals,
     // unless the user is actively dragging the view.
     if (this.lookId === null) {
-      const targetYaw = this.avatarAngle + 0.5;
+      // Camera offset is (sin yaw, cos yaw) but the avatar sits at (cos a, sin a):
+      // the radially-outside camera yaw is π/2 − a (+0.4 for a pleasing 3/4 view).
+      const targetYaw = Math.PI / 2 - this.avatarAngle + 0.4;
       let d = targetYaw - this.yaw;
       d = Math.atan2(Math.sin(d), Math.cos(d)); // shortest path
       this.yaw += d * (1 - Math.exp(-1.2 * dt));
