@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-export type AvatarPose = 'idle' | 'walk' | 'climb';
+export type AvatarPose = 'idle' | 'walk' | 'climb' | 'cheer';
 
 const SKIN = '#e8c39e';
 const TORSO = '#2bbd88';
@@ -70,6 +70,17 @@ export class Avatar {
       this.rLeg.rotation.x = 0.5 - reach * 0.4;
       this.body.position.y = 0;
       this.torso.scale.setScalar(1);
+    } else if (this.pose === 'cheer') {
+      // Both arms straight up with a happy wiggle and a little victory bounce.
+      const wiggle = Math.sin(t * 9);
+      this.lArm.rotation.x = -2.9;
+      this.rArm.rotation.x = -2.9;
+      this.lArm.rotation.z = 0.25 + wiggle * 0.12;
+      this.rArm.rotation.z = -0.25 - wiggle * 0.12;
+      this.lLeg.rotation.x = 0;
+      this.rLeg.rotation.x = 0;
+      this.body.position.y = Math.abs(Math.sin(t * 6)) * 0.08;
+      this.torso.scale.setScalar(1);
     } else {
       this.lLeg.rotation.x = 0;
       this.rLeg.rotation.x = 0;
@@ -77,6 +88,10 @@ export class Avatar {
       this.rArm.rotation.x = -Math.sin(t * 1.5) * 0.06;
       this.body.position.y = 0;
       this.torso.scale.setScalar(1 + Math.sin(t * 2) * 0.015);
+    }
+    if (this.pose !== 'cheer') {
+      this.lArm.rotation.z = 0;
+      this.rArm.rotation.z = 0;
     }
   }
 }

@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 import type { Avatar } from './avatar';
 
 const WALK_SPEED = 1.7;
@@ -7,14 +8,19 @@ const BASE_SPOT = { x: 3.4, z: 2.4 }; // where the avatar stands in journey mode
  * Drives the avatar when no rig owns it: standing at the tree base in
  * journey mode, wandering the grove floor in explore mode. Runtime
  * randomness is fine here (not part of the deterministic layout).
+ *
+ * Headings are written as a FULL quaternion (yaw only, perfectly upright) —
+ * never via partial rotation.y writes, which previously let a stray pitch
+ * from lookAt() survive and tilt the avatar.
  */
 export class AmbientWander {
   private target = { x: BASE_SPOT.x, z: BASE_SPOT.z };
   private idleUntil = 0;
+  private readonly euler = new THREE.Euler(0, 0, 0, 'YXZ');
 
   constructor(private readonly avatar: Avatar) {
     avatar.group.position.set(BASE_SPOT.x, 0, BASE_SPOT.z);
-    avatar.group.lookAt(0, 1, 0);
+    this.setHeading(Math.atan2(-BASE_SPOT.x, -BASE_SPOT.z)); // face the tree
   }
 
   /** Call every frame in journey/explore modes (NOT in climb — ClimbRig owns the avatar). */
@@ -37,15 +43,20 @@ export class AmbientWander {
       const step = Math.min(dist, WALK_SPEED * dt);
       g.position.x += (dx / dist) * step;
       g.position.z += (dz / dist) * step;
-      g.rotation.y = Math.atan2(dx, dz);
+      this.setHeading(Math.atan2(dx, dz));
       this.avatar.setPose('walk');
     } else {
       this.avatar.setPose('idle');
-      if (mode === 'journey') g.rotation.y = Math.atan2(-g.position.x, -g.position.z);
+      if (mode === 'journey') this.setHeading(Math.atan2(-g.position.x, -g.position.z));
       else if (this.idleUntil < t) this.idleUntil = t + 2 + Math.random() * 2;
     }
     g.position.y = 0;
     this.avatar.update(t);
+  }
+
+  private setHeading(yaw: number): void {
+    this.euler.set(0, yaw, 0);
+    this.avatar.group.quaternion.setFromEuler(this.euler);
   }
 
   private atTarget(): boolean {
