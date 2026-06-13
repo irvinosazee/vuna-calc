@@ -4,9 +4,11 @@ import { theme, levels } from './data/journey';
 import { chapterAt, leafIndexOf } from './journey/chapters';
 import { JourneyTree } from './scene/tree';
 import { Environment } from './scene/environment';
+import { Avatar } from './scene/avatar';
+import { AmbientWander } from './scene/wander';
 import { ScrollRig } from './rigs/ScrollRig';
 import { OrbitRig } from './rigs/OrbitRig';
-import { WalkRig } from './rigs/WalkRig';
+import { ClimbRig } from './rigs/ClimbRig';
 import type { CameraRig, Mode } from './rigs/types';
 import { createOverlay } from './ui/overlay';
 import { renderFallback } from './ui/fallback';
@@ -22,8 +24,10 @@ if (!webglAvailable()) {
 }
 
 function boot(): void {
+  const isMobile = window.matchMedia('(pointer: coarse)').matches;
+
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.75 : 2));
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.domElement.classList.add('webgl');
   app.appendChild(renderer.domElement);
@@ -36,7 +40,6 @@ function boot(): void {
   const tree = new JourneyTree();
   scene.add(tree.group);
 
-  const isMobile = window.matchMedia('(pointer: coarse)').matches;
   const env = new Environment(
     isMobile ? theme.particles.mobile : theme.particles.desktop,
     tree.layout.trunkHeight,
@@ -44,9 +47,13 @@ function boot(): void {
   );
   scene.add(env.group);
 
+  const avatar = new Avatar();
+  scene.add(avatar.group);
+  const wander = new AmbientWander(avatar);
+
   const scrollRig = new ScrollRig(tree.layout.cameraPoints);
   const orbitRig = new OrbitRig(renderer.domElement, tree.layout.trunkHeight);
-  const walkRig = new WalkRig(renderer.domElement, isMobile);
+  const climbRig = new ClimbRig(renderer.domElement, avatar, tree.layout);
   let mode: Mode = 'journey';
   let rig: CameraRig = scrollRig;
   const p0 = tree.layout.cameraPoints[0];
@@ -57,7 +64,7 @@ function boot(): void {
     if (next === mode) return;
     rig.dispose();
     mode = next;
-    rig = next === 'explore' ? orbitRig : next === 'walk' ? walkRig : scrollRig;
+    rig = next === 'explore' ? orbitRig : next === 'climb' ? climbRig : scrollRig;
     rig.enter(camera);
     // Non-journey modes lock page scroll (class also used by explore).
     document.body.classList.toggle('mode-explore', next !== 'journey');
@@ -96,7 +103,7 @@ function boot(): void {
     rig.update(camera, dt);
 
     // Always derived from scroll progress (not the active rig) so the guided
-    // position is preserved when the user dips into explore/walk and back.
+    // position is preserved when the user dips into explore/climb and back.
     const pos = chapterAt(scrollRig.progress, levels);
     const growth =
       mode !== 'journey' ? 1 : Math.min(1, Math.max(0, (scrollRig.progress - 0.04) / 0.7));
@@ -106,6 +113,7 @@ function boot(): void {
         ? leafIndexOf(levels, pos.levelIdx, pos.semIdx, pos.courseIdx)
         : null,
     );
+    if (mode !== 'climb') wander.update(t, dt, mode);
     tree.update(t);
     env.update(t);
     ui.update(scrollRig.progress, mode, pos);

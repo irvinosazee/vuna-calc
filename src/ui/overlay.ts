@@ -41,7 +41,7 @@ export function createOverlay(
       <nav class="modes">
         <button class="mode-btn active" data-mode="journey">Journey</button>
         <button class="mode-btn" data-mode="explore">Explore</button>
-        <button class="mode-btn" data-mode="walk">Walk</button>
+        <button class="mode-btn" data-mode="climb">Climb</button>
         <a class="mode-btn calc-link" href="./calculator/">Calculator</a>
       </nav>
     </header>
@@ -144,10 +144,8 @@ export function createOverlay(
       finale.classList.toggle('hidden', !journey || pos.phase !== 'finale');
       for (const btn of modeButtons) btn.classList.toggle('active', btn.dataset.mode === mode);
 
-      if (mode === 'walk') {
-        label.textContent = touch
-          ? 'Walk the grove — left thumb to move · right thumb to look'
-          : 'Walk the grove — WASD / arrows to move · drag to look';
+      if (mode === 'climb') {
+        label.textContent = 'Watch the climb — drag to swing the camera';
       } else if (mode === 'explore') {
         label.textContent = 'Free explore — drag, zoom, click a leaf';
       } else if (pos.phase === 'intro') {

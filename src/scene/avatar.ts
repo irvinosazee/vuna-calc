@@ -11,7 +11,7 @@ function flat(color: string): THREE.MeshStandardMaterial {
 }
 
 /**
- * Procedural low-poly student figure, ~1.7 units tall, pivot at the feet.
+ * Procedural low-poly student figure, ~1.5 units tall, pivot at the feet.
  * Movement/heading are driven externally (rigs/wander); the avatar only
  * animates its own limbs according to the current pose.
  */
