@@ -9,11 +9,19 @@ const PITCH_LIMIT = Math.PI * 0.35;
 const CAM_DIST = 5.2;
 const CLIMB_FACE_ANGLE = 0.9; // which side of the trunk the avatar climbs
 const SPAWN = { x: 9, z: 5 };
+const HUG_GAP = 0.06; // body almost touches the bark
+const LEAN = 0.21; // ~12° forward lean into the trunk while climbing
+const BOB_AMP = 0.12; // inchworm pull per arm reach (render-only)
+const BOB_FREQ = 5; // matches the climb pose's arm cycle (sin(t * 5))
+const CHEER_SECS = 2.5;
 
 /**
  * Cinematic auto-climb: drives the avatar (approach walk → trunk ascent with
- * level pauses → crown) while the camera follows; pointer-drag swings the
- * viewpoint around the avatar. No movement controls.
+ * level pauses → crown cheer) while the camera follows; pointer-drag swings
+ * the viewpoint around the avatar. No movement controls.
+ *
+ * The avatar's orientation is written as a FULL quaternion every frame
+ * (yaw eased shortest-path + lean), so no tilt can ever be inherited.
  */
 export class ClimbRig implements CameraRig {
   private elapsed = 0;
@@ -22,11 +30,14 @@ export class ClimbRig implements CameraRig {
   private lookId: number | null = null;
   private last = { x: 0, y: 0 };
   private detach: (() => void)[] = [];
+  private avatarAngle = CLIMB_FACE_ANGLE;
+  private avYaw = 0;
+  private avLean = 0;
+  private crownAt: number | null = null;
+  private readonly avatarEuler = new THREE.Euler(0, 0, 0, 'YXZ');
   private readonly target = new THREE.Vector3();
   private readonly desired = new THREE.Vector3();
-  // Preallocated head-height offset — avoids a Vector3 allocation per frame
-  private readonly headOffset = new THREE.Vector3(0, 1.3, 0);
-  private avatarAngle = CLIMB_FACE_ANGLE;
+  private readonly headOffset = new THREE.Vector3(0, 1.3, 0); // aim at head height
 
   constructor(
     private readonly dom: HTMLElement,
@@ -37,6 +48,9 @@ export class ClimbRig implements CameraRig {
   enter(): void {
     this.disposeListeners();
     this.elapsed = 0;
+    this.crownAt = null;
+    this.avatarAngle = CLIMB_FACE_ANGLE;
+    this.avLean = 0;
 
     const down = (e: PointerEvent): void => {
       if (this.lookId !== null) return;
@@ -75,29 +89,49 @@ export class ClimbRig implements CameraRig {
 
     if (s.phase === 'approach') {
       const base = trunkPointAt(this.layout, 0);
-      const contactX = base.x + Math.cos(CLIMB_FACE_ANGLE) * (base.radius + 0.25);
-      const contactZ = base.z + Math.sin(CLIMB_FACE_ANGLE) * (base.radius + 0.25);
+      const contactX = base.x + Math.cos(CLIMB_FACE_ANGLE) * (base.radius + HUG_GAP);
+      const contactZ = base.z + Math.sin(CLIMB_FACE_ANGLE) * (base.radius + HUG_GAP);
       const ease = s.approachT * s.approachT * (3 - 2 * s.approachT);
       g.position.set(
         SPAWN.x + (contactX - SPAWN.x) * ease,
         0,
         SPAWN.z + (contactZ - SPAWN.z) * ease,
       );
-      g.rotation.y = Math.atan2(contactX - SPAWN.x, contactZ - SPAWN.z);
+      this.setAvatarOrientation(Math.atan2(contactX - SPAWN.x, contactZ - SPAWN.z), 0, dt);
       this.avatarAngle = CLIMB_FACE_ANGLE;
       this.avatar.setPose('walk');
     } else if (s.phase === 'climb' || s.phase === 'pause') {
       const p = trunkPointAt(this.layout, s.height);
       const a = CLIMB_FACE_ANGLE + s.height * 0.12; // slight spiral
       this.avatarAngle = a;
-      g.position.set(p.x + Math.cos(a) * (p.radius + 0.22), s.height, p.z + Math.sin(a) * (p.radius + 0.22));
-      g.rotation.y = Math.atan2(p.x - g.position.x, p.z - g.position.z); // face the trunk
-      this.avatar.setPose(s.phase === 'pause' ? 'idle' : 'climb');
+      // Render-only reach rhythm: each arm cycle visibly pulls the body up.
+      const bob =
+        s.phase === 'climb' ? Math.max(0, Math.sin(this.elapsed * BOB_FREQ)) * BOB_AMP : 0;
+      g.position.set(
+        p.x + Math.cos(a) * (p.radius + HUG_GAP),
+        s.height + bob,
+        p.z + Math.sin(a) * (p.radius + HUG_GAP),
+      );
+      const towardTrunk = Math.atan2(p.x - g.position.x, p.z - g.position.z);
+      if (s.phase === 'pause') {
+        // Turn outward and stand upright — take in the view at this level.
+        this.setAvatarOrientation(towardTrunk + Math.PI, 0, dt);
+        this.avatar.setPose('idle');
+      } else {
+        this.setAvatarOrientation(towardTrunk, LEAN, dt);
+        this.avatar.setPose('climb');
+      }
     } else {
       const top = trunkPointAt(this.layout, this.layout.trunkHeight);
       g.position.set(top.x, this.layout.trunkHeight + 0.1, top.z);
-      g.rotation.y += dt * 0.4; // slow victorious turn in the crown
-      this.avatar.setPose('idle');
+      if (this.crownAt === null) this.crownAt = this.elapsed;
+      const sinceCrown = this.elapsed - this.crownAt;
+      // Victory: cheer first, then the slow turn surveying the grove.
+      this.avYaw += dt * (sinceCrown < CHEER_SECS ? 0 : 0.4);
+      this.avLean = 0;
+      this.avatarEuler.set(0, this.avYaw, 0);
+      g.quaternion.setFromEuler(this.avatarEuler);
+      this.avatar.setPose(sinceCrown < CHEER_SECS ? 'cheer' : 'idle');
     }
     this.avatar.update(this.elapsed);
 
@@ -112,8 +146,8 @@ export class ClimbRig implements CameraRig {
       this.yaw += d * (1 - Math.exp(-1.2 * dt));
     }
 
-    // Follow camera: orbit offset around a point at head height above the avatar.
-    this.target.copy(g.position).add(this.headOffset); // aim at head height
+    // Follow camera: orbit offset around a point just above the avatar.
+    this.target.copy(g.position).add(this.headOffset);
     const cp = Math.cos(this.pitch);
     this.desired.set(
       this.target.x + Math.sin(this.yaw) * cp * CAM_DIST,
@@ -129,6 +163,17 @@ export class ClimbRig implements CameraRig {
     this.lookId = null;
     // Ground the avatar so the ambient wander never sees a mid-trunk position.
     this.avatar.group.position.y = 0;
+  }
+
+  /** Full-orientation write: yaw eased shortest-path, lean eased, roll locked to 0. */
+  private setAvatarOrientation(targetYaw: number, lean: number, dt: number): void {
+    let d = targetYaw - this.avYaw;
+    d = Math.atan2(Math.sin(d), Math.cos(d));
+    const k = 1 - Math.exp(-6 * dt);
+    this.avYaw += d * k;
+    this.avLean += (lean - this.avLean) * k;
+    this.avatarEuler.set(this.avLean, this.avYaw, 0);
+    this.avatar.group.quaternion.setFromEuler(this.avatarEuler);
   }
 
   private disposeListeners(): void {
