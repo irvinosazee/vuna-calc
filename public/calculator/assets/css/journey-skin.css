@@ -85,3 +85,20 @@ a[title='Back to the 3D journey']:hover {
   background: var(--neu-accent) !important;
   color: #06281a !important;
 }
+
+/* ── Embedded mode (calculator shown inside the journey popup) ──── */
+
+body.embed {
+  background: transparent !important;
+}
+
+body.embed .container {
+  padding: 0 !important;
+}
+
+body.embed .title-panel,
+body.embed a[title='Back to the 3D journey'],
+body.embed #scroll-to-calculator,
+body.embed .theme-toggle-btn {
+  display: none !important;
+}

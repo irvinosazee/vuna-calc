@@ -18,11 +18,7 @@
 </head>
 
 <body>
-  <!-- Theme Toggle Button -->
-  <button class="btn btn-outline-secondary theme-toggle-btn" id="theme-toggle"
-    title="Toggle dark/light mode">
-    🌙
-  </button>
+  <script>if (new URLSearchParams(location.search).has('embed')) document.body.classList.add('embed');</script>
   <a href="../" class="btn btn-outline-secondary" title="Back to the 3D journey"
     style="position: fixed; top: 1rem; left: 1rem; z-index: 10">🌳 Journey</a>
   <div class="container">

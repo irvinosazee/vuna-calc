@@ -9,7 +9,10 @@ export default defineConfig({
       // Dev-only: the SPA fallback would otherwise serve the journey page for /calculator/.
       configureServer(server) {
         server.middlewares.use((req, _res, next) => {
-          if (req.url === '/calculator' || req.url === '/calculator/') req.url = '/calculator/index.html';
+          const path = (req.url || '').split('?')[0];
+          if (path === '/calculator' || path === '/calculator/') {
+            req.url = '/calculator/index.html';
+          }
           next();
         });
       },
