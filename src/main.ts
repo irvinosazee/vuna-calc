@@ -70,7 +70,9 @@ function boot(): void {
     document.body.classList.toggle('mode-explore', next !== 'journey');
   }
 
-  const ui = createOverlay(overlayRoot, setMode, isMobile);
+  const ui = createOverlay(overlayRoot, setMode, isMobile, (follow) =>
+    orbitRig.setFollow(follow ? () => avatar.group.position : null),
+  );
 
   const raycaster = new THREE.Raycaster();
   const pointer = new THREE.Vector2();

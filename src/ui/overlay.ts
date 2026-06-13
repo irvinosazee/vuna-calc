@@ -34,6 +34,7 @@ export function createOverlay(
   root: HTMLElement,
   onMode: (m: Mode) => void,
   touch: boolean,
+  onFollow: (follow: boolean) => void,
 ): OverlayHandles {
   root.innerHTML = `
     <header class="hud-top">
@@ -60,6 +61,7 @@ export function createOverlay(
       <div class="legend">
         ${LEGEND.map((l) => `<span class="legend-item"><i style="background:${l.color}"></i>${l.label}</span>`).join('')}
       </div>
+      <button class="follow-chip hidden">👁 Follow</button>
       <div class="level-label">Prologue</div>
       <div class="progress-track"><div class="progress-fill"></div></div>
       <div class="scroll-hint">Scroll to grow ↓</div>
@@ -97,6 +99,13 @@ export function createOverlay(
   const cardAbout = root.querySelector<HTMLElement>('.card-about')!;
   const cardMeta = root.querySelector<HTMLElement>('.card-meta')!;
   const modeButtons = [...root.querySelectorAll<HTMLButtonElement>('button.mode-btn[data-mode]')];
+  const followChip = root.querySelector<HTMLButtonElement>('.follow-chip')!;
+  let following = false;
+  followChip.addEventListener('click', () => {
+    following = !following;
+    followChip.classList.toggle('active', following);
+    onFollow(following);
+  });
 
   let pinned = false; // a clicked leaf overrides the auto ticker until closed
   let shownChapter = ''; // "levelIdx-semIdx" currently in the panel
@@ -143,11 +152,19 @@ export function createOverlay(
       hint.classList.toggle('hidden', !journey || progress > 0.03);
       finale.classList.toggle('hidden', !journey || pos.phase !== 'finale');
       for (const btn of modeButtons) btn.classList.toggle('active', btn.dataset.mode === mode);
+      followChip.classList.toggle('hidden', mode !== 'explore');
+      if (mode !== 'explore' && following) {
+        following = false;
+        followChip.classList.remove('active');
+        onFollow(false);
+      }
 
       if (mode === 'climb') {
         label.textContent = 'Watch the climb — drag to swing the camera';
       } else if (mode === 'explore') {
-        label.textContent = 'Free explore — drag, zoom, click a leaf';
+        label.textContent = following
+          ? 'Following — drag to orbit'
+          : 'Free explore — drag, zoom, click a leaf';
       } else if (pos.phase === 'intro') {
         label.textContent = 'Prologue';
       } else if (pos.phase === 'finale') {

@@ -84,6 +84,7 @@ body.no-webgl #spacer {
 
 .modes,
 .course-card,
+.follow-chip,
 .finale:not(.hidden) .finale-actions {
   pointer-events: auto;
 }
@@ -562,4 +563,30 @@ body.no-webgl #spacer {
     align-items: center;
     gap: 0.5rem;
   }
+}
+
+/* ── Explore follow chip ───────────────────────────────────────── */
+
+.follow-chip {
+  align-self: flex-start;
+  font: 600 0.75rem 'Sora', sans-serif;
+  color: #d8ffe9;
+  background: rgba(6, 40, 24, 0.55);
+  border: 1px solid rgba(150, 255, 190, 0.25);
+  border-radius: 999px;
+  padding: 0.35rem 0.9rem;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  margin-bottom: 0.2rem;
+  transition: opacity 0.3s, border-color 0.2s, background 0.2s;
+}
+
+.follow-chip.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.follow-chip.active {
+  background: rgba(52, 211, 153, 0.3);
+  border-color: #34d399;
 }
