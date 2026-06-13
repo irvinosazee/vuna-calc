@@ -103,7 +103,8 @@ export function buildLayout(levels: Level[]): TreeLayout {
     const radius = 11 - t * 3.5;
     cameraPoints.push({
       x: Math.cos(angle) * radius,
-      y: 1.2 + t * (trunkHeight + 2),
+      // +6 lifts the path's end above the crown dome so the finale floats over the canopy.
+      y: 1.2 + t * (trunkHeight + 6),
       z: Math.sin(angle) * radius,
     });
   }

@@ -464,7 +464,7 @@ body.no-webgl #spacer {
 
 @media (max-width: 640px) {
   .brand {
-    font-size: 0.85rem;
+    display: none; /* page title carries the name; free the row for the mode buttons */
   }
 
   .modes {
@@ -487,7 +487,8 @@ body.no-webgl #spacer {
     display: flex;
     align-items: baseline;
     gap: 0.6rem;
-    white-space: nowrap;
+    flex-wrap: wrap;
+    justify-content: center;
   }
 
   .chapter-panel.hidden {
@@ -537,6 +538,7 @@ body.no-webgl #spacer {
   }
 
   .leaf-hint {
+    top: calc(7.6rem + env(safe-area-inset-top));
     font-size: 0.74rem;
     max-width: 92vw;
     white-space: nowrap;

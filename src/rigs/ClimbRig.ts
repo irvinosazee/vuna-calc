@@ -26,6 +26,7 @@ export class ClimbRig implements CameraRig {
   private readonly desired = new THREE.Vector3();
   // Preallocated head-height offset — avoids a Vector3 allocation per frame
   private readonly headOffset = new THREE.Vector3(0, 1.3, 0);
+  private avatarAngle = CLIMB_FACE_ANGLE;
 
   constructor(
     private readonly dom: HTMLElement,
@@ -83,10 +84,12 @@ export class ClimbRig implements CameraRig {
         SPAWN.z + (contactZ - SPAWN.z) * ease,
       );
       g.rotation.y = Math.atan2(contactX - SPAWN.x, contactZ - SPAWN.z);
+      this.avatarAngle = CLIMB_FACE_ANGLE;
       this.avatar.setPose('walk');
     } else if (s.phase === 'climb' || s.phase === 'pause') {
       const p = trunkPointAt(this.layout, s.height);
       const a = CLIMB_FACE_ANGLE + s.height * 0.12; // slight spiral
+      this.avatarAngle = a;
       g.position.set(p.x + Math.cos(a) * (p.radius + 0.22), s.height, p.z + Math.sin(a) * (p.radius + 0.22));
       g.rotation.y = Math.atan2(p.x - g.position.x, p.z - g.position.z); // face the trunk
       this.avatar.setPose(s.phase === 'pause' ? 'idle' : 'climb');
@@ -97,6 +100,15 @@ export class ClimbRig implements CameraRig {
       this.avatar.setPose('idle');
     }
     this.avatar.update(this.elapsed);
+
+    // Keep the camera on the avatar's side of the trunk while it spirals,
+    // unless the user is actively dragging the view.
+    if (this.lookId === null) {
+      const targetYaw = this.avatarAngle + 0.5;
+      let d = targetYaw - this.yaw;
+      d = Math.atan2(Math.sin(d), Math.cos(d)); // shortest path
+      this.yaw += d * (1 - Math.exp(-1.2 * dt));
+    }
 
     // Follow camera: orbit offset around a point at head height above the avatar.
     this.target.copy(g.position).add(this.headOffset); // aim at head height
