@@ -423,3 +423,141 @@ body.no-webgl #spacer {
   color: #c4f0d8;
 }
 
+
+/* ── Touch hygiene (all sizes) ─────────────────────────────────── */
+
+.hud-top,
+.hud-bottom,
+.beat,
+.finale,
+.chapter-panel,
+.leaf-hint {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.mode-btn,
+.card-close {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mode-btn {
+  min-height: 44px;
+}
+
+.card-close {
+  min-width: 44px;
+  min-height: 44px;
+  display: grid;
+  place-content: center;
+}
+
+.hud-top {
+  padding-top: calc(1rem + env(safe-area-inset-top));
+}
+
+.hud-bottom {
+  padding-bottom: calc(1.2rem + env(safe-area-inset-bottom));
+}
+
+/* ── Phone layout (≤640px) ─────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .brand {
+    font-size: 0.85rem;
+  }
+
+  .modes {
+    gap: 0.3rem;
+  }
+
+  .mode-btn {
+    padding: 0.4rem 0.7rem;
+    font-size: 0.75rem;
+  }
+
+  /* Chapter panel becomes a slim top-center strip under the header */
+  .chapter-panel {
+    top: calc(3.9rem + env(safe-area-inset-top));
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 92vw;
+    width: max-content;
+    padding: 0.55rem 1rem;
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    white-space: nowrap;
+  }
+
+  .chapter-panel.hidden {
+    transform: translateX(-50%) translateY(-10px);
+  }
+
+  .chapter-panel.compact {
+    transform: translateX(-50%) scale(0.9);
+    transform-origin: top center;
+  }
+
+  .chapter-panel .chapter-level {
+    font-size: 1rem;
+  }
+
+  .chapter-panel .chapter-sem {
+    font-size: 0.62rem;
+    margin-top: 0;
+  }
+
+  .chapter-panel .chapter-meta {
+    font-size: 0.62rem;
+    margin-top: 0;
+    color: #a8e6c5;
+  }
+
+  /* Course card becomes a bottom sheet above the HUD */
+  .course-card {
+    top: auto;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    transform: none;
+    width: 100vw;
+    max-width: none;
+    border-radius: 20px 20px 0 0;
+    border-left: none;
+    border-right: none;
+    border-bottom: none;
+    padding: 1.1rem 1.3rem calc(4.6rem + env(safe-area-inset-bottom));
+    transition: opacity 0.25s, transform 0.3s;
+  }
+
+  .course-card.hidden {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+
+  .leaf-hint {
+    font-size: 0.74rem;
+    max-width: 92vw;
+    white-space: nowrap;
+  }
+
+  .legend {
+    gap: 0.55rem;
+    font-size: 0.6rem;
+  }
+
+  .beat p {
+    font-size: 0.78rem;
+  }
+
+  .finale-stats {
+    font-size: 0.9rem;
+  }
+
+  .finale-actions {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+}
