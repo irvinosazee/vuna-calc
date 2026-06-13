@@ -33,6 +33,7 @@ export class ClimbRig implements CameraRig {
   private avatarAngle = CLIMB_FACE_ANGLE;
   private avYaw = 0;
   private avLean = 0;
+  private camDist = CAM_DIST;
   private bobVal = 0;
   private crownAt: number | null = null;
   private readonly avatarEuler = new THREE.Euler(0, 0, 0, 'YXZ');
@@ -52,6 +53,7 @@ export class ClimbRig implements CameraRig {
     this.crownAt = null;
     this.avatarAngle = CLIMB_FACE_ANGLE;
     this.avLean = 0;
+    this.camDist = CAM_DIST;
     this.avYaw = 0;
     this.bobVal = 0;
 
@@ -144,6 +146,10 @@ export class ClimbRig implements CameraRig {
     // Keep the camera on the avatar's side of the trunk while it spirals,
     // unless the user is actively dragging the view.
     if (this.lookId === null) {
+      // Crown: pull back and rise above the foliage dome for the finale framing.
+      if (s.phase === 'crown') {
+        this.pitch += (0.35 - this.pitch) * (1 - Math.exp(-1.2 * dt));
+      }
       // Camera offset is (sin yaw, cos yaw) but the avatar sits at (cos a, sin a):
       // the radially-outside camera yaw is π/2 − a (+0.4 for a pleasing 3/4 view).
       const targetYaw = Math.PI / 2 - this.avatarAngle + 0.4;
@@ -152,13 +158,16 @@ export class ClimbRig implements CameraRig {
       this.yaw += d * (1 - Math.exp(-1.2 * dt));
     }
 
+    const distTarget = s.phase === 'crown' ? 8 : CAM_DIST;
+    this.camDist += (distTarget - this.camDist) * (1 - Math.exp(-2 * dt));
+
     // Follow camera: orbit offset around a point just above the avatar.
     this.target.copy(g.position).add(this.headOffset);
     const cp = Math.cos(this.pitch);
     this.desired.set(
-      this.target.x + Math.sin(this.yaw) * cp * CAM_DIST,
-      this.target.y + Math.sin(this.pitch) * CAM_DIST + 0.6,
-      this.target.z + Math.cos(this.yaw) * cp * CAM_DIST,
+      this.target.x + Math.sin(this.yaw) * cp * this.camDist,
+      this.target.y + Math.sin(this.pitch) * this.camDist + 0.6,
+      this.target.z + Math.cos(this.yaw) * cp * this.camDist,
     );
     camera.position.lerp(this.desired, 1 - Math.exp(-4 * dt));
     camera.lookAt(this.target);
