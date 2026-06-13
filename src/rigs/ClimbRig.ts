@@ -113,6 +113,8 @@ export class ClimbRig implements CameraRig {
   dispose(): void {
     this.disposeListeners();
     this.lookId = null;
+    // Ground the avatar so the ambient wander never sees a mid-trunk position.
+    this.avatar.group.position.y = 0;
   }
 
   private disposeListeners(): void {

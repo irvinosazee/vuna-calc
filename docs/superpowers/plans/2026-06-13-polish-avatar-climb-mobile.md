@@ -1133,6 +1133,7 @@ export class ClimbRig implements CameraRig {
   private detach: (() => void)[] = [];
   private readonly target = new THREE.Vector3();
   private readonly desired = new THREE.Vector3();
+  private readonly headOffset = new THREE.Vector3(0, 1.3, 0); // aim at head height
 
   constructor(
     private readonly dom: HTMLElement,
@@ -1205,8 +1206,8 @@ export class ClimbRig implements CameraRig {
     }
     this.avatar.update(this.elapsed);
 
-    // Follow camera: orbit offset around a point just above the avatar.
-    this.target.copy(g.position).add(new THREE.Vector3(0, 1.1, 0));
+    // Follow camera: orbit offset around a point at head height above the avatar.
+    this.target.copy(g.position).add(this.headOffset); // aim at head height
     const cp = Math.cos(this.pitch);
     this.desired.set(
       this.target.x + Math.sin(this.yaw) * cp * CAM_DIST,
