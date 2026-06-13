@@ -60,6 +60,10 @@ function boot(): void {
   camera.position.set(p0.x, p0.y, p0.z);
   rig.enter(camera);
 
+  const clock = new THREE.Clock();
+  let bubbleUntil = 0;
+  const proj = new THREE.Vector3();
+
   function setMode(next: Mode): void {
     if (next === mode) return;
     rig.dispose();
@@ -70,8 +74,18 @@ function boot(): void {
     document.body.classList.toggle('mode-explore', next !== 'journey');
   }
 
-  const ui = createOverlay(overlayRoot, setMode, isMobile, (follow) =>
-    orbitRig.setFollow(follow ? () => avatar.group.position : null),
+  function onCalc(open: boolean): void {
+    // Opening the calculator drops into the ambient explore view (Irvin roams
+    // behind the glass card); closing returns to the guided journey.
+    setMode(open ? 'explore' : 'journey');
+  }
+
+  const ui = createOverlay(
+    overlayRoot,
+    setMode,
+    isMobile,
+    (follow) => orbitRig.setFollow(follow ? () => avatar.group.position : null),
+    onCalc,
   );
 
   const raycaster = new THREE.Raycaster();
@@ -84,9 +98,13 @@ function boot(): void {
     if (Math.hypot(e.clientX - downAt.x, e.clientY - downAt.y) > 6) return;
     pointer.set((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
     raycaster.setFromCamera(pointer, camera);
-    const hit = raycaster.intersectObject(tree.leafMesh)[0];
-    if (hit?.instanceId !== undefined) {
-      ui.showCourse(tree.leafRefs[hit.instanceId]);
+    const avatarHit = raycaster.intersectObject(avatar.group, true)[0];
+    const leafHit = raycaster.intersectObject(tree.leafMesh)[0];
+    if (avatarHit && (!leafHit || avatarHit.distance < leafHit.distance)) {
+      avatar.wave(clock.elapsedTime);
+      bubbleUntil = clock.elapsedTime + 3;
+    } else if (leafHit?.instanceId !== undefined) {
+      ui.showCourse(tree.leafRefs[leafHit.instanceId]);
     } else {
       ui.hideCourse();
     }
@@ -98,7 +116,6 @@ function boot(): void {
     renderer.setSize(window.innerWidth, window.innerHeight);
   });
 
-  const clock = new THREE.Clock();
   renderer.setAnimationLoop(() => {
     const dt = Math.min(clock.getDelta(), 0.05);
     const t = clock.elapsedTime;
@@ -119,6 +136,20 @@ function boot(): void {
     tree.update(t);
     env.update(t);
     ui.update(scrollRig.progress, mode, pos);
+
+    // Irvin speech bubble follows his projected head while active.
+    if (t < bubbleUntil) {
+      proj.set(avatar.group.position.x, avatar.group.position.y + 1.6, avatar.group.position.z);
+      proj.project(camera);
+      ui.setIrvinBubble(
+        proj.z < 1
+          ? { x: (proj.x * 0.5 + 0.5) * window.innerWidth, y: (-proj.y * 0.5 + 0.5) * window.innerHeight }
+          : null,
+      );
+    } else {
+      ui.setIrvinBubble(null);
+    }
+
     renderer.render(scene, camera);
   });
 }
