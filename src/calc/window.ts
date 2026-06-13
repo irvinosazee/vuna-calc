@@ -49,7 +49,7 @@ export class CalcWindow {
     el.className = 'calc-win hidden';
     el.innerHTML = `
       <div class="calc-win-bar">
-        <span class="calc-win-title">🧮 SEN Calculator</span>
+        <span class="calc-win-title">🧮 SEN 482 Calculator</span>
         <div class="calc-win-btns">
           <button class="calc-win-min" aria-label="Minimize">–</button>
           <button class="calc-win-close" aria-label="Close">×</button>
